@@ -1,13 +1,12 @@
 #include "registry/registry.h"
 
-Registry::Registry()
-{}
+Registry::Registry() {}
 
-unsigned int Registry::RegisterEntity(std::string id)
+EntityID Registry::RegisterEntity(std::string id)
 {
-	unsigned int int_id = ids_.size();
+	auto newEntityID = ids_.size();
 
-	ids_[id] = int_id;
+	ids_[id] = newEntityID;
 
-	return int_id;
+	return newEntityID;
 }

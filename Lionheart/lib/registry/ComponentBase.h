@@ -1,8 +1,11 @@
 #pragma once
 
+
+using EntityID = int;
+
 struct ComponentBase
 {
 	ComponentBase();
 	virtual ~ComponentBase();
-	unsigned int id_;
+	EntityID id_;
 };

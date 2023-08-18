@@ -8,38 +8,43 @@
 #include <unordered_map>
 #include <cassert>
 
-
 class Registry
 {
 public:
 	Registry();
-	unsigned int RegisterEntity(std::string);
+	EntityID RegisterEntity(std::string);
+
 	template<typename T>
-	std::unordered_map<unsigned int, std::unique_ptr<ComponentBase>>& GetComponentMap();
+	std::unordered_map<EntityID, std::unique_ptr<ComponentBase>>& GetComponentMap();
+
 	template<typename T>
-	T* GetComponent(unsigned int);
+	T* GetComponent(EntityID);
+
 	template<typename T>
-	T* AddComponent(unsigned int);
+	T* AddComponent(EntityID);
+
 	template<typename... Ts>
 	std::vector<std::tuple<Ts...>>& View();
+
 	template<typename T1, typename T2, typename... Ts>
-	std::vector<unsigned int> ViewIDs();
+	std::vector<EntityID> ViewIDs();
+
 	template<typename T>
-	std::vector<unsigned int> ViewIDs();
+	std::vector<EntityID> ViewIDs();
 private:
-	std::unordered_map<std::string, unsigned int> ids_;
-	std::unordered_map<std::type_index, std::unordered_map<unsigned int, std::unique_ptr<ComponentBase>>> componentMaps_;
+	std::unordered_map<std::string, EntityID> ids_;
+	std::unordered_map<std::type_index, std::unordered_map<EntityID, std::unique_ptr<ComponentBase>>> componentMaps_;
 };
 
 template<typename T>
-std::unordered_map<unsigned int, std::unique_ptr<ComponentBase>>& Registry::GetComponentMap()
+std::unordered_map<EntityID, std::unique_ptr<ComponentBase>>& Registry::GetComponentMap()
 {
 	const std::type_index componentTypeIndex(typeid(T));
 	return componentMaps_[componentTypeIndex];
 }
 
 template<typename T>
-T* Registry::AddComponent(unsigned int id)
+T* Registry::AddComponent(EntityID id)
 {
 	auto& componentMap = GetComponentMap<T>();
 	componentMap[id] = std::make_unique<T>();
@@ -48,7 +53,7 @@ T* Registry::AddComponent(unsigned int id)
 }
 
 template<typename T>
-T* Registry::GetComponent(unsigned int id)
+T* Registry::GetComponent(EntityID id)
 {
 	auto& componentMap = GetComponentMap<T>();
 	if (componentMap.find(id) == componentMap.end()) return nullptr;
@@ -66,7 +71,7 @@ std::vector<std::tuple<Ts...>>& Registry::View()
 }
 
 template<typename T1, typename T2, typename... Ts>
-std::vector<unsigned int> Registry::ViewIDs()
+std::vector<EntityID> Registry::ViewIDs()
 {
 	auto givenIDs = ViewIDs<T2, Ts...>();
 
@@ -81,9 +86,9 @@ std::vector<unsigned int> Registry::ViewIDs()
 }
 
 template<typename T>
-std::vector<unsigned int> Registry::ViewIDs()
+std::vector<EntityID> Registry::ViewIDs()
 {
-	auto matchingIDs = std::vector<unsigned int>();
+	auto matchingIDs = std::vector<EntityID>();
 	auto& componentMap = GetComponentMap<T>();
 	for (auto& componentMapItr : componentMap)
 	{

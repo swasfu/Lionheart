@@ -151,7 +151,7 @@
   <ItemGroup>
     <ClCompile Include="src\registry\ComponentBase.cpp" />
     <ClCompile Include="src\registry\Registry.cpp" />
-    <ClCompile Include="lib\parsing\XMLParser.cpp" />
+    <ClCompile Include="src\parsing\XMLParser.cpp" />
     <ClCompile Include="lib\thirdparty\pugixml\pugixml.cpp" />
     <ClCompile Include="src\registry\FlagsComponent.cpp" />
     <ClCompile Include="src\registry\NameComponent.cpp" />

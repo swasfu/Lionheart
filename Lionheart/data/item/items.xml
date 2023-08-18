@@ -1,6 +1,3 @@
-<items>
-	<item id="grain">
-    <name>grain</name>
-    <nutrition value="10" />
-	</item>
-</items>
+<item id="grain">
+  <name>grain</name>
+</item>
