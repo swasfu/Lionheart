@@ -21,20 +21,14 @@ void XMLParser::ParseFile(std::string filename)
 
 	pugi::xml_parse_result result = doc.load(stream);
 
-	if (result)
+	for (auto& child : doc)
 	{
-		for (auto& child : doc)
+		//std::cout << "Reading child " << child.name() << std::endl;
+		if (std::string(child.name()) == "items")
 		{
-			std::cout << "Reading child " << child.name() << std::endl;
-			if (std::string(child.name()) == "items")
-			{
-				std::cout << "Found items!" << std::endl;
-				ParseItems(child);
-			}
+			//std::cout << "Found items!" << std::endl;
+			ParseItems(child);
 		}
-	} else
-	{
-		// LOG ERROR!!!!
 	}
 }
 
@@ -42,17 +36,17 @@ void XMLParser::ParseItems(pugi::xml_node& items)
 {
 	for (const auto& item : items)
 	{
-		std::cout << "Reading " << item.name() << " " << item.attribute("id").value() << std::endl;
+		//std::cout << "Reading " << item.name() << " " << item.attribute("id").value() << std::endl;
 
 		auto id = std::string(item.attribute("id").value());
 		auto intID = registryPtr_->RegisterEntity(id);
 
 		for (const auto& child : item)
 		{
-			std::cout << "Examining " << child.name() << " attribute" << std::endl;
+			//std::cout << "Examining " << child.name() << " attribute" << std::endl;
 			for (const auto& attribute : child.attributes())
 			{
-				std::cout << attribute.name() << ": " << attribute.value() << std::endl;
+				//std::cout << attribute.name() << ": " << attribute.value() << std::endl;
 			}
 
 			if (std::string(child.name()) == "name")
