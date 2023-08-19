@@ -1,0 +1,10 @@
+<settlements>
+	<settlement id="london">
+		<name>London</name>
+    <transform>
+      <x>10.1</x>
+      <y>15.2</y>
+      <z>2.0</z>
+    </transform>
+	</settlement>
+</settlements>

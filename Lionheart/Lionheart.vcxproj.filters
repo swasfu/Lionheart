@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lib\registry\NameComponent.h">
+    <ClInclude Include="lib\1240\components\NameComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="lib\registry\FlagsComponent.h">
+    <ClInclude Include="lib\1240\components\FlagsComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="lib\thirdparty\pugixml\pugixml.hpp">
@@ -36,27 +36,33 @@
     <ClInclude Include="lib\registry\Registry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="lib\1240\parsing\1240XMLBuilders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data\map\1240\starting_settlements.xml">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\TransformComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\RotationComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\StringIDComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Test.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\registry\NameComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\registry\FlagsComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="lib\thirdparty\pugixml\pugixml.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="lib\parsing\XMLParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\registry\Registry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\registry\ComponentBase.cpp">
+    <ClCompile Include="src\parsing\XMLParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\1240\1240Test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

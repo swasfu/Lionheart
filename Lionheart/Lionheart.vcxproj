@@ -117,6 +117,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,22 +141,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="data\map\1240\starting_settlements.xml" />
+    <ClInclude Include="lib\1240\components\StringIDComponent.h" />
+    <ClInclude Include="lib\1240\components\RotationComponent.h" />
+    <ClInclude Include="lib\1240\components\TransformComponent.h" />
+    <ClInclude Include="lib\1240\parsing\1240XMLBuilders.h" />
     <ClInclude Include="lib\registry\ComponentBase.h" />
-    <ClInclude Include="lib\registry\FlagsComponent.h" />
-    <ClInclude Include="lib\registry\NameComponent.h" />
+    <ClInclude Include="lib\1240\components\FlagsComponent.h" />
+    <ClInclude Include="lib\1240\components\NameComponent.h" />
     <ClInclude Include="lib\registry\Registry.h" />
     <ClInclude Include="lib\parsing\XMLParser.h" />
     <ClInclude Include="lib\thirdparty\pugixml\pugiconfig.hpp" />
     <ClInclude Include="lib\thirdparty\pugixml\pugixml.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\registry\ComponentBase.cpp" />
     <ClCompile Include="src\registry\Registry.cpp" />
     <ClCompile Include="src\parsing\XMLParser.cpp" />
     <ClCompile Include="lib\thirdparty\pugixml\pugixml.cpp" />
-    <ClCompile Include="src\registry\FlagsComponent.cpp" />
-    <ClCompile Include="src\registry\NameComponent.cpp" />
-    <ClCompile Include="src\Test.cpp" />
+    <ClCompile Include="src\1240\1240Test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\item\items.xml" />

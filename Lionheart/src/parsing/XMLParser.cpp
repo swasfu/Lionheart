@@ -3,15 +3,13 @@
 #include <fstream>
 #include <iostream>
 
-const std::string XMLParser::dataDirectory_ = "data/";
-
 XMLParser::XMLParser(Registry* r) : registryPtr_{ r } {}
 
 void XMLParser::ParseFile(std::string filename)
 {
 	pugi::xml_document doc;
 
-	std::ifstream stream(dataDirectory_ + filename);
+	std::ifstream stream(filename);
 
 	if (stream.fail())
 	{
@@ -24,8 +22,7 @@ void XMLParser::ParseFile(std::string filename)
 
 	for (auto& def : defs)
 	{
-		auto id = std::string(def.attribute("id").value());
-		auto entityID = registryPtr_->RegisterEntity(id);
+		auto entityID = registryPtr_->RegisterEntity();
 
 		for (auto& component : def)
 		{
@@ -35,7 +32,7 @@ void XMLParser::ParseFile(std::string filename)
 				componentNameToBuildFunction_[componentName](registryPtr_, entityID, component);
 			} else
 			{
-				std::cout << filename << ": Unknown component type \"" << componentName << "\" added in " << def.name() << " \'" << def.attribute("id").value() << "\'" << std::endl;
+				std::cout << filename << ": Unknown component type \"" << componentName << "\" added in " << def.name() << std::endl;
 			}
 		}
 	}

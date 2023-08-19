@@ -1,5 +1,6 @@
 <items>
-  <item id="grain">
+  <item>
+    <id>grain</id>
     <name>grain</name>
     <flags>
       <flag>food</flag>
@@ -7,7 +8,8 @@
     </flags>
   </item>
   
-  <item id="grapes">
+  <item>
+    <id>grain</id>
     <name>grapes</name>
     <flags>
       <flag>food</flag>
@@ -15,10 +17,8 @@
     </flags>
   </item>
   
-  <item id="sword">
+  <item>
+    <id>grain</id>
     <name>one-handed sword</name>
-    <fakeComponent>poopoo</fakeComponent>
   </item>
-
 </items>
-
