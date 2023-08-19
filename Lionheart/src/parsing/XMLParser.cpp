@@ -3,6 +3,8 @@
 #include <fstream>
 #include <iostream>
 
+const std::string XMLParser::dataDirectory_ = "data/";
+
 XMLParser::XMLParser(Registry* r) : registryPtr_{ r } {}
 
 template <>
@@ -32,7 +34,7 @@ void XMLParser::ParseFile(std::string filename)
 {
 	pugi::xml_document doc;
 
-	std::ifstream stream(filename);
+	std::ifstream stream(dataDirectory_ + filename);
 
 	if (stream.fail())
 	{

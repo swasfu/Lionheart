@@ -17,6 +17,7 @@
   
   <item id="sword">
     <name>one-handed sword</name>
+    <fakeComponent>poopoo</fakeComponent>
   </item>
 
 </items>

@@ -21,6 +21,7 @@ public:
 private:
 	Registry* registryPtr_;
 	std::unordered_map<std::string, BuildComponentFunction> componentNameToAddFunction_;
+	static const std::string dataDirectory_;
 };
 
 template <typename T>

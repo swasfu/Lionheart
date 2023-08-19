@@ -11,7 +11,7 @@ int main()
 	XMLParser parser(registryPtr.get());
 	parser.RegisterComponents();
 
-	parser.ParseFile("data/item/items.xml");
+	parser.ParseFile("item/items.xml");
 
 	std::cout << "Named entities:" << std::endl;
 	for (auto entityID : registryPtr->ViewIDs<NameComponent>())
