@@ -1,4 +1,6 @@
 #include "parsing/XMLParser.h"
+#include "registry/NameComponent.h"
+#include "registry/FlagsComponent.h"
 
 #include <fstream>
 #include <iostream>
@@ -26,8 +28,8 @@ void BuildComponent<FlagsComponent>(Registry* registryPtr, EntityID entityID, pu
 
 void XMLParser::RegisterComponents()
 {
-	componentNameToAddFunction_["name"] = &BuildComponent<NameComponent>;
-	componentNameToAddFunction_["flags"] = &BuildComponent<FlagsComponent>;
+	componentNameToBuildFunction_["name"] = &BuildComponent<NameComponent>;
+	componentNameToBuildFunction_["flags"] = &BuildComponent<FlagsComponent>;
 }
 
 void XMLParser::ParseFile(std::string filename)
@@ -53,9 +55,9 @@ void XMLParser::ParseFile(std::string filename)
 		for (auto& component : def)
 		{
 			const std::string componentName = std::string(component.name());
-			if (componentNameToAddFunction_.find(componentName) != componentNameToAddFunction_.end())
+			if (componentNameToBuildFunction_.find(componentName) != componentNameToBuildFunction_.end())
 			{
-				componentNameToAddFunction_[componentName](registryPtr_, entityID, component);
+				componentNameToBuildFunction_[componentName](registryPtr_, entityID, component);
 			} else
 			{
 				std::cout << filename << ": Unknown component type \"" << componentName << "\" added in " << def.name() << " \'" << def.attribute("id").value() << "\'" << std::endl;

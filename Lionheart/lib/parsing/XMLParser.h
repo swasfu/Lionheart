@@ -1,8 +1,6 @@
 #pragma once
 
 #include "../registry/registry.h"
-#include "registry/NameComponent.h"
-#include "registry/FlagsComponent.h"
 
 #include "../thirdparty/pugixml/pugixml.hpp"
 
@@ -20,7 +18,7 @@ public:
 	void RegisterComponents();
 private:
 	Registry* registryPtr_;
-	std::unordered_map<std::string, BuildComponentFunction> componentNameToAddFunction_;
+	std::unordered_map<std::string, BuildComponentFunction> componentNameToBuildFunction_;
 	static const std::string dataDirectory_;
 };
 

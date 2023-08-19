@@ -4,9 +4,9 @@ Registry::Registry() {}
 
 EntityID Registry::RegisterEntity(std::string id)
 {
-	auto newEntityID = ids_.size();
+	auto newEntityID = stringIDtoEntityID_.size();
 
-	ids_[id] = newEntityID;
+	stringIDtoEntityID_[id] = newEntityID;
 
 	return newEntityID;
 }
