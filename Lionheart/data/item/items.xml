@@ -1,3 +1,23 @@
-<item id="grain">
-  <name>grain</name>
-</item>
+<items>
+  <item id="grain">
+    <name>grain</name>
+    <flags>
+      <flag>food</flag>
+      <flag>vegetable</flag>
+    </flags>
+  </item>
+  
+  <item id="grapes">
+    <name>grapes</name>
+    <flags>
+      <flag>food</flag>
+      <flag>fruit</flag>
+    </flags>
+  </item>
+  
+  <item id="sword">
+    <name>one-handed sword</name>
+  </item>
+
+</items>
+

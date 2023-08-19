@@ -18,7 +18,7 @@ void BuildComponent<FlagsComponent>(Registry* registryPtr, EntityID entityID, pu
 	auto flagsComponent = registryPtr->AddComponent<FlagsComponent>(entityID);
 	for (auto& flag : node)
 	{
-		flagsComponent->flags_.push_back(std::string(node.text().get()));
+		flagsComponent->flags_.push_back(std::string(flag.text().get()));
 	}
 }
 
@@ -36,21 +36,28 @@ void XMLParser::ParseFile(std::string filename)
 
 	if (stream.fail())
 	{
-		std::cout << "Failed to open file " << filename << "!" << std::endl;
+		std::cout << filename << ": Failed to open file" << std::endl;
 		return;
 	}
 
 	pugi::xml_parse_result result = doc.load(stream);
+	auto defs = doc.first_child().children();
 
-	for (auto def : doc)
+	for (auto& def : defs)
 	{
 		auto id = std::string(def.attribute("id").value());
 		auto entityID = registryPtr_->RegisterEntity(id);
 
-		for (auto component : def)
+		for (auto& component : def)
 		{
-			std::string componentName = std::string(component.name());
-			componentNameToAddFunction_[componentName](registryPtr_, entityID, component);
+			const std::string componentName = std::string(component.name());
+			if (componentNameToAddFunction_.find(componentName) != componentNameToAddFunction_.end())
+			{
+				componentNameToAddFunction_[componentName](registryPtr_, entityID, component);
+			} else
+			{
+				std::cout << filename << ": Unknown component type \"" << componentName << "\" added in " << def.name() << " \'" << def.attribute("id").value() << "\'" << std::endl;
+			}
 		}
 	}
 }

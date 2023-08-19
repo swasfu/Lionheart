@@ -13,13 +13,17 @@ int main()
 
 	parser.ParseFile("data/item/items.xml");
 
-	auto testComponentPtr = registryPtr->GetComponent<NameComponent>(0);
-	std::cout << "Test: " << testComponentPtr->name_ << std::endl;
-	registryPtr->View<NameComponent>();
-	registryPtr->ViewIDs<NameComponent>();
-	std::cout << "Items with both name and flags component:" << std::endl;
-	for (auto id : registryPtr->ViewIDs<NameComponent, FlagsComponent>()) std::cout << id << std::endl;
-	registryPtr->GetComponentMap<NameComponent>();
+	std::cout << "Named entities:" << std::endl;
+	for (auto entityID : registryPtr->ViewIDs<NameComponent>())
+	{
+		std::cout << entityID << " - " << registryPtr->GetComponent<NameComponent>(entityID)->name_ << std::endl;
+		std::cout << "Flags:" << std::endl;
+		if (auto flags = registryPtr->GetComponent<FlagsComponent>(entityID))
+		{
+			for (auto& flag : flags->flags_) std::cout << flag << std::endl;
+		} else std::cout << "None" << std::endl;
+		std::cout << std::endl;
+	}
 
 	return 0;
 }
