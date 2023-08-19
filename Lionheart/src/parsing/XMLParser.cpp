@@ -1,6 +1,4 @@
 #include "parsing/XMLParser.h"
-#include "registry/NameComponent.h"
-#include "registry/FlagsComponent.h"
 
 #include <fstream>
 #include <iostream>
@@ -8,29 +6,6 @@
 const std::string XMLParser::dataDirectory_ = "data/";
 
 XMLParser::XMLParser(Registry* r) : registryPtr_{ r } {}
-
-template <>
-void BuildComponent<NameComponent>(Registry* registryPtr, EntityID entityID, pugi::xml_node node)
-{
-	auto nameComponent = registryPtr->AddComponent<NameComponent>(entityID);
-	nameComponent->name_ = std::string(node.text().get());
-}
-
-template <>
-void BuildComponent<FlagsComponent>(Registry* registryPtr, EntityID entityID, pugi::xml_node node)
-{
-	auto flagsComponent = registryPtr->AddComponent<FlagsComponent>(entityID);
-	for (auto& flag : node)
-	{
-		flagsComponent->flags_.push_back(std::string(flag.text().get()));
-	}
-}
-
-void XMLParser::RegisterComponents()
-{
-	componentNameToBuildFunction_["name"] = &BuildComponent<NameComponent>;
-	componentNameToBuildFunction_["flags"] = &BuildComponent<FlagsComponent>;
-}
 
 void XMLParser::ParseFile(std::string filename)
 {

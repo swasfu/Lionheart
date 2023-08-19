@@ -9,7 +9,8 @@ int main()
 {
 	auto registryPtr = std::make_unique<Registry>();
 	XMLParser parser(registryPtr.get());
-	parser.RegisterComponents();
+	parser.RegisterComponent<NameComponent>("name");
+	parser.RegisterComponent<FlagsComponent>("flags");
 
 	parser.ParseFile("item/items.xml");
 
