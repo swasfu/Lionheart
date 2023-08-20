@@ -142,6 +142,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="data\map\1240\starting_settlements.xml" />
+    <ClInclude Include="lib\1240\components\ItemProcessComponent.h" />
+    <ClInclude Include="lib\1240\components\OverworldMapComponent.h" />
     <ClInclude Include="lib\1240\components\StringIDComponent.h" />
     <ClInclude Include="lib\1240\components\RotationComponent.h" />
     <ClInclude Include="lib\1240\components\TransformComponent.h" />
