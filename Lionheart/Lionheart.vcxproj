@@ -142,19 +142,26 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="data\map\1240\starting_settlements.xml" />
-    <ClInclude Include="lib\1240\components\OverworldMapComponent.h" />
-    <ClInclude Include="lib\1240\components\StrategyPOIComponent.h" />
+    <ClInclude Include="lib\1240\components\items\crafting\FlaggedIngredientComponent.h" />
+    <ClInclude Include="lib\1240\components\items\ItemComponent.h" />
+    <ClInclude Include="lib\1240\components\items\MassUnitComponent.h" />
+    <ClInclude Include="lib\1240\components\items\VolumeUnitComponent.h" />
+    <ClInclude Include="lib\1240\components\overworld\OverworldMapComponent.h" />
+    <ClInclude Include="lib\1240\components\items\crafting\SpecificIngredientComponent.h" />
+    <ClInclude Include="lib\1240\components\overworld\OverworldPOIComponent.h" />
     <ClInclude Include="lib\1240\components\RotationComponent.h" />
     <ClInclude Include="lib\1240\components\TransformComponent.h" />
+    <ClInclude Include="lib\1240\systems\TestSystem.h" />
     <ClInclude Include="lib\registry\ComponentBase.h" />
     <ClInclude Include="lib\1240\components\FlagsComponent.h" />
     <ClInclude Include="lib\registry\Registry.h" />
     <ClInclude Include="lib\parsing\XMLParser.h" />
-    <ClInclude Include="lib\registry\SystemBase.h" />
+    <ClInclude Include="lib\systems\SystemBase.h" />
     <ClInclude Include="lib\thirdparty\pugixml\pugiconfig.hpp" />
     <ClInclude Include="lib\thirdparty\pugixml\pugixml.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\1240\systems\TestSystem.cpp" />
     <ClCompile Include="src\registry\Registry.cpp" />
     <ClCompile Include="src\parsing\XMLParser.cpp" />
     <ClCompile Include="lib\thirdparty\pugixml\pugixml.cpp" />

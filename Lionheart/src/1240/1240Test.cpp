@@ -29,7 +29,7 @@ int main()
 		if (EndsWith(path, ".xml")) parser.ParseFile(path);
 	}
 
-	registryPtr->ResolveStringIDs();
+	registryPtr->ResolveIDs();
 
 	for (EntityID entityID = 0; entityID < registryPtr->GetEntityCount(); entityID++)
 	{

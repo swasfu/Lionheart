@@ -42,13 +42,31 @@
     <ClInclude Include="lib\1240\components\RotationComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="lib\1240\components\OverworldMapComponent.h">
+    <ClInclude Include="lib\1240\components\overworld\OverworldMapComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="lib\1240\components\StrategyPOIComponent.h">
+    <ClInclude Include="lib\1240\components\overworld\OverworldPOIComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="lib\registry\SystemBase.h">
+    <ClInclude Include="lib\systems\SystemBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\systems\TestSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\items\crafting\SpecificIngredientComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\items\ItemComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\items\VolumeUnitComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\items\MassUnitComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\items\crafting\FlaggedIngredientComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -63,6 +81,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\1240\1240Test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\1240\systems\TestSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

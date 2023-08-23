@@ -6,7 +6,7 @@
 
 struct OverworldMapComponent : public ComponentBase
 {
-	double* heightMap_;
+	float* heightMap_;
 	int length_;
 	int width_;
 };

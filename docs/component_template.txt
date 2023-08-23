@@ -4,8 +4,6 @@
 #include "registry/ComponentBase.h"
 #include "parsing/XMLParser.h"
 
-#include <string>
-
 struct __COMPONENT_NAME__ : public ComponentBase
 {
 	// Component data here!

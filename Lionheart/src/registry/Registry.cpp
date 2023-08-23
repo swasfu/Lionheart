@@ -7,12 +7,12 @@ EntityID Registry::RegisterEntity(std::string stringID)
 	return newEntityID;
 }
 
-void Registry::LodgeStringID(EntityID* entityIDPtr, std::string stringID)
+void Registry::LodgeUnresolvedID(EntityID* entityIDPtr, std::string stringID)
 {
 	unresolvedEntityIDPtrsToStringIDs_[entityIDPtr] = stringID;
 }
 
-void Registry::ResolveStringIDs()
+void Registry::ResolveIDs()
 {
 	for (const auto& pair : unresolvedEntityIDPtrsToStringIDs_)
 	{

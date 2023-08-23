@@ -31,9 +31,10 @@ public:
 	template<typename T>
 	std::vector<EntityID> ViewIDs();
 
-	void LodgeStringID(EntityID*, std::string);
-	void ResolveStringIDs();
+	void LodgeUnresolvedID(EntityID*, std::string);
+	void ResolveIDs();
 	void FlushResolver();
+
 	EntityID GetEntityCount();
 private:
 	EntityID entityCount_;
