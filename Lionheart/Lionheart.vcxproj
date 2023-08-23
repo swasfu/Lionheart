@@ -150,6 +150,7 @@
     <ClInclude Include="lib\1240\components\FlagsComponent.h" />
     <ClInclude Include="lib\registry\Registry.h" />
     <ClInclude Include="lib\parsing\XMLParser.h" />
+    <ClInclude Include="lib\registry\SystemBase.h" />
     <ClInclude Include="lib\thirdparty\pugixml\pugiconfig.hpp" />
     <ClInclude Include="lib\thirdparty\pugixml\pugixml.hpp" />
   </ItemGroup>

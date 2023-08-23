@@ -33,6 +33,7 @@ public:
 
 	void LodgeStringID(EntityID*, std::string);
 	void ResolveStringIDs();
+	void FlushResolver();
 	EntityID GetEntityCount();
 private:
 	EntityID entityCount_;

@@ -20,6 +20,11 @@ void Registry::ResolveStringIDs()
 	}
 }
 
+void Registry::FlushResolver()
+{
+	unresolvedEntityIDPtrsToStringIDs_.clear();
+}
+
 EntityID Registry::GetEntityCount()
 {
 	return entityCount_;
