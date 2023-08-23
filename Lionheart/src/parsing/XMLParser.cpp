@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iostream>
 
-XMLParser::XMLParser(Registry* r) : registryPtr_{ r } {}
+XMLParser::XMLParser(Registry* registryPtr) : registryPtr_(registryPtr) {}
 
 void XMLParser::ParseFile(std::string filename)
 {
@@ -22,7 +22,7 @@ void XMLParser::ParseFile(std::string filename)
 
 	for (auto& def : defs)
 	{
-		auto entityID = registryPtr_->RegisterEntity();
+		auto entityID = registryPtr_->RegisterEntity(def.attribute("id").value());
 
 		for (auto& component : def)
 		{

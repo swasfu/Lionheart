@@ -1,7 +1,6 @@
 #pragma once
 
-
-using EntityID = int;
+using EntityID = unsigned int;
 
 struct ComponentBase
 {

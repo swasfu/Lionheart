@@ -1,10 +1,9 @@
 #include "registry/Registry.h"
-#include "1240/components/NameComponent.h"
-#include "1240/components/StringIDComponent.h"
+#include "parsing/XMLParser.h"
 #include "1240/components/FlagsComponent.h"
 #include "1240/components/TransformComponent.h"
 #include "1240/components/RotationComponent.h"
-#include "1240/parsing/1240XMLBuilders.h"
+#include "1240/components/StrategyPOIComponent.h"
 
 #include <iostream>
 #include <filesystem>
@@ -19,32 +18,25 @@ int main()
 {
 	auto registryPtr = std::make_unique<Registry>();
 	XMLParser parser(registryPtr.get());
-	parser.RegisterComponent<NameComponent>("name");
-	parser.RegisterComponent<StringIDComponent>("id");
 	parser.RegisterComponent<FlagsComponent>("flags");
 	parser.RegisterComponent<TransformComponent>("transform");
 	parser.RegisterComponent<RotationComponent>("rotation");
+	parser.RegisterComponent<StrategyPOIComponent>("strategyPOI");
 
 	for (const auto& file : std::filesystem::recursive_directory_iterator("data\\"))
 	{
 		std::string path = file.path().string();
-		//std::cout << path << std::endl;
-		if (EndsWith(path, ".xml"))
-		{
-			parser.ParseFile(path);
-		}
+		if (EndsWith(path, ".xml")) parser.ParseFile(path);
 	}
 
-	std::cout << "Named entities:" << std::endl;
-	for (auto entityID : registryPtr->ViewIDs<NameComponent>())
+	registryPtr->ResolveStringIDs();
+
+	for (EntityID entityID = 0; entityID < registryPtr->GetEntityCount(); entityID++)
 	{
-		std::cout << entityID << " - " << registryPtr->GetComponent<NameComponent>(entityID)->name_ << std::endl;
-		std::cout << "Flags:" << std::endl;
-		if (auto flags = registryPtr->GetComponent<FlagsComponent>(entityID))
+		if (auto ref = registryPtr->GetComponent<StrategyPOIComponent>(entityID))
 		{
-			for (auto& flag : flags->flags_) std::cout << flag << std::endl;
-		} else std::cout << "None" << std::endl;
-		std::cout << std::endl;
+			std::cout << "Test: " << ref->name_ << std::endl;
+		}
 	}
 
 	return 0;

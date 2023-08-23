@@ -142,15 +142,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="data\map\1240\starting_settlements.xml" />
-    <ClInclude Include="lib\1240\components\ItemProcessComponent.h" />
     <ClInclude Include="lib\1240\components\OverworldMapComponent.h" />
-    <ClInclude Include="lib\1240\components\StringIDComponent.h" />
+    <ClInclude Include="lib\1240\components\StrategyPOIComponent.h" />
     <ClInclude Include="lib\1240\components\RotationComponent.h" />
     <ClInclude Include="lib\1240\components\TransformComponent.h" />
-    <ClInclude Include="lib\1240\parsing\1240XMLBuilders.h" />
     <ClInclude Include="lib\registry\ComponentBase.h" />
     <ClInclude Include="lib\1240\components\FlagsComponent.h" />
-    <ClInclude Include="lib\1240\components\NameComponent.h" />
     <ClInclude Include="lib\registry\Registry.h" />
     <ClInclude Include="lib\parsing\XMLParser.h" />
     <ClInclude Include="lib\thirdparty\pugixml\pugiconfig.hpp" />

@@ -11,7 +11,7 @@
 class Registry
 {
 public:
-	EntityID RegisterEntity();
+	EntityID RegisterEntity(std::string);
 
 	template<typename T>
 	std::unordered_map<EntityID, std::unique_ptr<ComponentBase>>& GetComponentMap();
@@ -30,8 +30,14 @@ public:
 
 	template<typename T>
 	std::vector<EntityID> ViewIDs();
+
+	void LodgeStringID(EntityID*, std::string);
+	void ResolveStringIDs();
+	EntityID GetEntityCount();
 private:
-	EntityID entityCounter_;
+	EntityID entityCount_;
+	std::unordered_map<std::string, EntityID> stringIDsToEntityIDs_;
+	std::unordered_map<EntityID*, std::string> unresolvedEntityIDPtrsToStringIDs_;
 	std::unordered_map<std::type_index, std::unordered_map<EntityID, std::unique_ptr<ComponentBase>>> componentTypeToMap_;
 };
 
