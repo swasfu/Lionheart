@@ -3,7 +3,6 @@
 #include "1240/components/FlagsComponent.h"
 #include "1240/components/TransformComponent.h"
 #include "1240/components/RotationComponent.h"
-#include "1240/components/StrategyPOIComponent.h"
 
 #include <iostream>
 #include <filesystem>
@@ -21,7 +20,8 @@ int main()
 	parser.RegisterComponent<FlagsComponent>("flags");
 	parser.RegisterComponent<TransformComponent>("transform");
 	parser.RegisterComponent<RotationComponent>("rotation");
-	parser.RegisterComponent<StrategyPOIComponent>("strategyPOI");
+
+	registryPtr->GetComponentMap<FlagsComponent>();
 
 	for (const auto& file : std::filesystem::recursive_directory_iterator("data\\"))
 	{
@@ -30,14 +30,6 @@ int main()
 	}
 
 	registryPtr->ResolveIDs();
-
-	for (EntityID entityID = 0; entityID < registryPtr->GetEntityCount(); entityID++)
-	{
-		if (auto ref = registryPtr->GetComponent<StrategyPOIComponent>(entityID))
-		{
-			std::cout << "Test: " << ref->name_ << std::endl;
-		}
-	}
 
 	return 0;
 }

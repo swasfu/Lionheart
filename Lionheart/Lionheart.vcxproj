@@ -142,6 +142,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="data\map\1240\starting_settlements.xml" />
+    <ClInclude Include="lib\1240\components\creatures\BodyPartComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\BodyPartFunctionComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\BodyPartInstanceComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\BodyPartLinkComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\BodyTemplateComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\CreatureFunctionComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\CreatureFunctionLinkComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\OrganComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\SentienceInstanceComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\SentienceTemplateComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\SentienceTraitComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\SentienceTraitLinkComponent.h" />
     <ClInclude Include="lib\1240\components\items\crafting\FlaggedIngredientComponent.h" />
     <ClInclude Include="lib\1240\components\items\ItemComponent.h" />
     <ClInclude Include="lib\1240\components\items\MassUnitComponent.h" />
@@ -169,6 +181,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="data\item\items.xml" />
+    <None Include="lib\1240\components\creatures\BodyPartAttachedComponent.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

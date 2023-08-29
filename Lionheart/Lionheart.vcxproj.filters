@@ -69,6 +69,42 @@
     <ClInclude Include="lib\1240\components\items\crafting\FlaggedIngredientComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="lib\1240\components\creatures\BodyPartComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\creatures\OrganComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\creatures\BodyPartFunctionComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\creatures\CreatureFunctionComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\creatures\SentienceTemplateComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\creatures\BodyTemplateComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\creatures\SentienceTraitComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\creatures\SentienceTraitLinkComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\creatures\BodyPartLinkComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\creatures\CreatureFunctionLinkComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\creatures\SentienceInstanceComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\1240\components\creatures\BodyPartInstanceComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lib\thirdparty\pugixml\pugixml.cpp">
@@ -89,5 +125,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="data\item\items.xml" />
+    <None Include="lib\1240\components\creatures\BodyPartAttachedComponent.h" />
   </ItemGroup>
 </Project>
