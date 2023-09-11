@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -118,10 +118,12 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>Z:\projects\Lionheart\Lionheart\obj;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -141,11 +143,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="data\map\1240\starting_settlements.xml" />
     <ClInclude Include="lib\1240\components\creatures\BodyPartComponent.h" />
-    <ClInclude Include="lib\1240\components\creatures\BodyPartFunctionComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\BodyPartFunctionInputComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\BodyPartFunctionOutputComponent.h" />
     <ClInclude Include="lib\1240\components\creatures\BodyPartInstanceComponent.h" />
     <ClInclude Include="lib\1240\components\creatures\BodyPartLinkComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\BodyProductionComponent.h" />
     <ClInclude Include="lib\1240\components\creatures\BodyTemplateComponent.h" />
     <ClInclude Include="lib\1240\components\creatures\CreatureFunctionComponent.h" />
     <ClInclude Include="lib\1240\components\creatures\CreatureFunctionLinkComponent.h" />
@@ -154,6 +157,9 @@
     <ClInclude Include="lib\1240\components\creatures\SentienceTemplateComponent.h" />
     <ClInclude Include="lib\1240\components\creatures\SentienceTraitComponent.h" />
     <ClInclude Include="lib\1240\components\creatures\SentienceTraitLinkComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\SpeciesBodyTemplateLinkComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\SpeciesComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\SpeciesSentienceTemplateLinkComponent.h" />
     <ClInclude Include="lib\1240\components\items\crafting\FlaggedIngredientComponent.h" />
     <ClInclude Include="lib\1240\components\items\ItemComponent.h" />
     <ClInclude Include="lib\1240\components\items\MassUnitComponent.h" />
@@ -164,24 +170,64 @@
     <ClInclude Include="lib\1240\components\RotationComponent.h" />
     <ClInclude Include="lib\1240\components\TransformComponent.h" />
     <ClInclude Include="lib\1240\systems\TestSystem.h" />
-    <ClInclude Include="lib\registry\ComponentBase.h" />
+    <ClInclude Include="lib\lionheart\ecs\registry\ComponentBase.h" />
     <ClInclude Include="lib\1240\components\FlagsComponent.h" />
-    <ClInclude Include="lib\registry\Registry.h" />
-    <ClInclude Include="lib\parsing\XMLParser.h" />
-    <ClInclude Include="lib\systems\SystemBase.h" />
+    <ClInclude Include="lib\lionheart\ecs\registry\Registry.h" />
+    <ClInclude Include="lib\ecs\parsing\XMLParser.h" />
+    <ClInclude Include="lib\lionheart\ecs\systems\SystemBase.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLCamera.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLEBO.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLMesh.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLModel.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLVAO.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLVBO.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLShaderProgram.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLTexture.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLVertex.h" />
+    <ClInclude Include="lib\lionheart\util\File.h" />
+    <ClInclude Include="lib\math\Constants.h" />
+    <ClInclude Include="lib\math\polygons\Icosahedron.h" />
+    <ClInclude Include="lib\math\polygons\Polyhedron.h" />
+    <ClInclude Include="lib\math\polygons\Polygon.h" />
+    <ClInclude Include="lib\math\polygons\PolyVertex.h" />
+    <ClInclude Include="lib\math\Vector3.h" />
     <ClInclude Include="lib\thirdparty\pugixml\pugiconfig.hpp" />
     <ClInclude Include="lib\thirdparty\pugixml\pugixml.hpp" />
+    <ClInclude Include="lib\thirdparty\stb\stb_image.h" />
+    <ClInclude Include="lib\worldgen\components\ModelComponent.h" />
+    <ClInclude Include="lib\worldgen\components\TileComponent.h" />
+    <ClInclude Include="lib\worldgen\World.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\1240\systems\TestSystem.cpp" />
-    <ClCompile Include="src\registry\Registry.cpp" />
-    <ClCompile Include="src\parsing\XMLParser.cpp" />
+    <ClCompile Include="lib\lionheart\graphics\GLCamera.cpp" />
+    <ClCompile Include="lib\lionheart\graphics\GLEBO.cpp" />
+    <ClCompile Include="lib\lionheart\graphics\GLMesh.cpp" />
+    <ClCompile Include="lib\lionheart\graphics\GLModel.cpp" />
+    <ClCompile Include="lib\lionheart\graphics\GLShaderProgram.cpp" />
+    <ClCompile Include="lib\lionheart\graphics\GLTexture.cpp" />
+    <ClCompile Include="lib\lionheart\graphics\GLVAO.cpp" />
+    <ClCompile Include="lib\lionheart\graphics\GLVBO.cpp" />
+    <ClCompile Include="lib\lionheart\util\File.cpp" />
+    <ClCompile Include="lib\math\polygons\Icosahedron.cpp" />
+    <ClCompile Include="lib\math\polygons\Polygon.cpp" />
+    <ClCompile Include="lib\math\polygons\Polyhedron.cpp" />
+    <ClCompile Include="lib\math\polygons\PolyVertex.cpp" />
+    <ClCompile Include="lib\math\Vector3.cpp" />
     <ClCompile Include="lib\thirdparty\pugixml\pugixml.cpp" />
-    <ClCompile Include="src\1240\1240Test.cpp" />
+    <ClCompile Include="lib\thirdparty\stb\stb_image.cpp" />
+    <ClCompile Include="lib\worldgen\World.cpp" />
+    <ClCompile Include="src\ecs\registry\Registry.cpp" />
+    <ClCompile Include="src\ecs\parsing\XMLParser.cpp" />
+    <ClCompile Include="lib\worldgen\Main.cpp" />
+    <ClCompile Include="src\thirdparty\glad\gl.c" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\item\items.xml" />
+    <None Include="data\shaders\default.frag" />
+    <None Include="data\shaders\default.vert" />
     <None Include="lib\1240\components\creatures\BodyPartAttachedComponent.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="obj\glfw\glfw3.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

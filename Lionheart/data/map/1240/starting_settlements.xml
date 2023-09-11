@@ -1,9 +1,0 @@
-<settlements>
-	<settlement id="london">
-    <strategyPOI>
-      <x>10.1</x>
-      <y>15.2</y>
-      <name>London</name>
-    </strategyPOI>
-	</settlement>
-</settlements>

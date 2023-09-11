@@ -1,130 +1,90 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
+    <ClCompile Include="src\ecs\registry\Registry.cpp" />
+    <ClCompile Include="src\ecs\parsing\XMLParser.cpp" />
+    <ClCompile Include="lib\worldgen\Main.cpp" />
+    <ClCompile Include="src\thirdparty\glad\gl.c" />
+    <ClCompile Include="lib\math\polygons\Icosahedron.cpp" />
+    <ClCompile Include="lib\math\polygons\Polygon.cpp" />
+    <ClCompile Include="lib\math\polygons\PolyVertex.cpp" />
+    <ClCompile Include="lib\math\Vector3.cpp" />
+    <ClCompile Include="lib\math\polygons\Polyhedron.cpp" />
+    <ClCompile Include="lib\worldgen\World.cpp" />
+    <ClCompile Include="lib\lionheart\util\File.cpp" />
+    <ClCompile Include="lib\lionheart\graphics\GLShaderProgram.cpp" />
+    <ClCompile Include="lib\lionheart\graphics\GLVBO.cpp" />
+    <ClCompile Include="lib\lionheart\graphics\GLEBO.cpp" />
+    <ClCompile Include="lib\lionheart\graphics\GLVAO.cpp" />
+    <ClCompile Include="lib\thirdparty\pugixml\pugixml.cpp" />
+    <ClCompile Include="lib\thirdparty\stb\stb_image.cpp" />
+    <ClCompile Include="lib\lionheart\graphics\GLTexture.cpp" />
+    <ClCompile Include="lib\lionheart\graphics\GLCamera.cpp" />
+    <ClCompile Include="lib\lionheart\graphics\GLMesh.cpp" />
+    <ClCompile Include="lib\lionheart\graphics\GLModel.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lib\1240\components\FlagsComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\thirdparty\pugixml\pugixml.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\thirdparty\pugixml\pugiconfig.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\parsing\XMLParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\registry\ComponentBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\registry\Registry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="data\map\1240\starting_settlements.xml">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\TransformComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\RotationComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\overworld\OverworldMapComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\overworld\OverworldPOIComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\systems\SystemBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\systems\TestSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\items\crafting\SpecificIngredientComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\items\ItemComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\items\VolumeUnitComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\items\MassUnitComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\items\crafting\FlaggedIngredientComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\creatures\BodyPartComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\creatures\OrganComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\creatures\BodyPartFunctionComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\creatures\CreatureFunctionComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\creatures\SentienceTemplateComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\creatures\BodyTemplateComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\creatures\SentienceTraitComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\creatures\SentienceTraitLinkComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\creatures\BodyPartLinkComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\creatures\CreatureFunctionLinkComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\creatures\SentienceInstanceComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="lib\1240\components\creatures\BodyPartInstanceComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClInclude Include="lib\1240\components\creatures\BodyPartComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\BodyPartFunctionInputComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\BodyPartFunctionOutputComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\BodyPartInstanceComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\BodyPartLinkComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\BodyProductionComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\BodyTemplateComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\CreatureFunctionComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\CreatureFunctionLinkComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\OrganComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\SentienceInstanceComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\SentienceTemplateComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\SentienceTraitComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\SentienceTraitLinkComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\SpeciesBodyTemplateLinkComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\SpeciesComponent.h" />
+    <ClInclude Include="lib\1240\components\creatures\SpeciesSentienceTemplateLinkComponent.h" />
+    <ClInclude Include="lib\1240\components\items\crafting\FlaggedIngredientComponent.h" />
+    <ClInclude Include="lib\1240\components\items\ItemComponent.h" />
+    <ClInclude Include="lib\1240\components\items\MassUnitComponent.h" />
+    <ClInclude Include="lib\1240\components\items\VolumeUnitComponent.h" />
+    <ClInclude Include="lib\1240\components\overworld\OverworldMapComponent.h" />
+    <ClInclude Include="lib\1240\components\items\crafting\SpecificIngredientComponent.h" />
+    <ClInclude Include="lib\1240\components\overworld\OverworldPOIComponent.h" />
+    <ClInclude Include="lib\1240\components\RotationComponent.h" />
+    <ClInclude Include="lib\1240\components\TransformComponent.h" />
+    <ClInclude Include="lib\1240\systems\TestSystem.h" />
+    <ClInclude Include="lib\1240\components\FlagsComponent.h" />
+    <ClInclude Include="lib\ecs\parsing\XMLParser.h" />
+    <ClInclude Include="lib\math\polygons\PolyVertex.h" />
+    <ClInclude Include="lib\math\Vector3.h" />
+    <ClInclude Include="lib\math\polygons\Icosahedron.h" />
+    <ClInclude Include="lib\math\polygons\Polygon.h" />
+    <ClInclude Include="lib\math\Constants.h" />
+    <ClInclude Include="lib\math\polygons\Polyhedron.h" />
+    <ClInclude Include="lib\worldgen\World.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLVertex.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLTexture.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLShaderProgram.h" />
+    <ClInclude Include="lib\lionheart\util\File.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLVBO.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLEBO.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLVAO.h" />
+    <ClInclude Include="lib\thirdparty\pugixml\pugiconfig.hpp" />
+    <ClInclude Include="lib\thirdparty\pugixml\pugixml.hpp" />
+    <ClInclude Include="lib\thirdparty\stb\stb_image.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLCamera.h" />
+    <ClInclude Include="lib\lionheart\ecs\registry\ComponentBase.h" />
+    <ClInclude Include="lib\lionheart\ecs\registry\Registry.h" />
+    <ClInclude Include="lib\lionheart\ecs\systems\SystemBase.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLMesh.h" />
+    <ClInclude Include="lib\worldgen\components\ModelComponent.h" />
+    <ClInclude Include="lib\worldgen\components\TileComponent.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLModel.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="lib\thirdparty\pugixml\pugixml.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\registry\Registry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\parsing\XMLParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\1240\1240Test.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\1240\systems\TestSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="data\item\items.xml" />
     <None Include="lib\1240\components\creatures\BodyPartAttachedComponent.h" />
+    <None Include="data\shaders\default.frag" />
+    <None Include="data\shaders\default.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="obj\glfw\glfw3.lib" />
   </ItemGroup>
 </Project>
