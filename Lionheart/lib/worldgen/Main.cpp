@@ -41,13 +41,10 @@ int main(void)
 
 	glViewport(0, 0, windowWidth, windowHeight);
 
-	GLShaderProgram shaderProgram("data/shaders/default.vert", "data/shaders/default.frag");
-	shaderProgram.Use();
-
-	float rotation = 0.0f;
-	double prevTime = glfwGetTime();
-
 	glEnable(GL_DEPTH_TEST);
+
+	GLShaderProgram shaderProgram("data/shaders/defaultVertexShader.glsl", "data/shaders/basicFragmentShader.glsl");
+	shaderProgram.Use();
 
 	GLCamera camera(windowWidth, windowHeight, glm::vec3(0.0f, 0.0f, 2.0f));
 
@@ -64,17 +61,11 @@ int main(void)
 	std::vector<GLuint> testIndices = { 0, 1, 2 };
 	GLTexture testTexture;
 
-	/*
 	GLMesh testMesh(testVertices, testIndices, testTexture);
-	std::cout << "kms" << std::endl;
-	std::cout << testMesh.vao.id << std::endl;
 
 	GLModel testModel = GLModel(testMesh);
-	std::cout << "kms3" << std::endl;
-	std::cout << testModel.mesh.vao.id << std::endl;
-	*/
 
-	World::GenerateTiles(&registry, 1.0f, 1);
+	World::GenerateTiles(&registry, 1.0f, 20);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -126,43 +117,67 @@ int main(void)
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		shaderProgram.Use();
-		//testModel.mesh.vao.Bind();
-		GLVBO testVBO(testVertices);
-		testVBO.Bind();
-		GLEBO testEBO(testIndices);
-		testEBO.Bind();
-		GLVAO testVAO;
-		//testVAO.Bind();
+		/*
+		GLuint vbo;
+		glGenBuffers(1, &vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, testVertices.size() * sizeof(GLVertex), testVertices.data(), GL_STATIC_DRAW);
 
-		testVAO.LinkAttrib(testVBO, 0, 3, GL_FLOAT, sizeof(GLVertex), (void*)0);
-		testVAO.LinkAttrib(testVBO, 1, 3, GL_FLOAT, sizeof(GLVertex), (void*)(3 * sizeof(float)));
-		testVAO.LinkAttrib(testVBO, 2, 3, GL_FLOAT, sizeof(GLVertex), (void*)(6 * sizeof(float)));
-		testVAO.LinkAttrib(testVBO, 3, 2, GL_FLOAT, sizeof(GLVertex), (void*)(9 * sizeof(float)));
+		GLuint vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+
+		GLuint ebo;
+		glGenBuffers(1, &ebo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, testIndices.size() * sizeof(GLuint), testIndices.data(), GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLVertex), (void*)0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLVertex), (void*)(1 * sizeof(glm::vec3)));
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(GLVertex), (void*)(2 * sizeof(glm::vec3)));
+		glEnableVertexAttribArray(0);
+		glEnableVertexAttribArray(1);
+		glEnableVertexAttribArray(2);
+
+		shaderProgram.Use();
 
 		glm::mat4 testModelMatrix = glm::mat4(1.0f);
-		//testModelMatrix = glm::translate(testModel.position);
 		glm::mat4 testViewMatrix = glm::mat4(1.0f);
 		glm::mat4 testProjMatrix = glm::mat4(1.0f);
 
-		GLint testModelLocation = glGetUniformLocation(shaderProgram.id, "m");
+		GLint testModelLocation = glGetUniformLocation(shaderProgram.id, "model");
 		glUniformMatrix4fv(testModelLocation, 1, GL_FALSE, glm::value_ptr(testModelMatrix));
-		GLint testViewLocation = glGetUniformLocation(shaderProgram.id, "v");
+		GLint testViewLocation = glGetUniformLocation(shaderProgram.id, "view");
 		glUniformMatrix4fv(testViewLocation, 1, GL_FALSE, glm::value_ptr(testViewMatrix));
-		GLint testProjLocation = glGetUniformLocation(shaderProgram.id, "p");
+		GLint testProjLocation = glGetUniformLocation(shaderProgram.id, "proj");
 		glUniformMatrix4fv(testProjLocation, 1, GL_FALSE, glm::value_ptr(testProjMatrix));
+
+		glBindVertexArray(vao);
+		glDrawElements(GL_TRIANGLES, testIndices.size(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+		*/
+
 		/*
+		testModel.mesh.vao.Bind();
+
+		glm::mat4 testModelMatrix = glm::mat4(1.0f);
+		testModelMatrix = glm::translate(testModel.position);
+		glm::mat4 testViewMatrix = glm::mat4(1.0f);
+		glm::mat4 testProjMatrix = glm::mat4(1.0f);
+
+		GLint testModelLocation = glGetUniformLocation(shaderProgram.id, "model");
+		glUniformMatrix4fv(testModelLocation, 1, GL_FALSE, glm::value_ptr(testModelMatrix));
+		GLint testViewLocation = glGetUniformLocation(shaderProgram.id, "view");
+		glUniformMatrix4fv(testViewLocation, 1, GL_FALSE, glm::value_ptr(camera.ViewMatrix()));
+		GLint testProjLocation = glGetUniformLocation(shaderProgram.id, "proj");
+		glUniformMatrix4fv(testProjLocation, 1, GL_FALSE, glm::value_ptr(camera.ProjectionMatrix(45.0f, 0.01f, 100.0f)));
+
 		testModel.mesh.texture.Uniform(shaderProgram, "tex0", 0);
 		testModel.mesh.texture.Bind();
 
-		for (auto& index : testModel.mesh.indices)
-		{
-			std::cout << "Index: " << index << ", vertex: (" << testModel.mesh.vertices[index].position.x << ", " << testModel.mesh.vertices[index].position.y << ", " << testModel.mesh.vertices[index].position.z << ")" << std::endl;
-		}
-		*/
 		glDrawElements(GL_TRIANGLES, testIndices.size(), GL_UNSIGNED_INT, 0);
+		*/
 
-		/*
 		auto modelIDs = registry.ViewIDs<ModelComponent>();
 
 		for (auto modelID : modelIDs)
@@ -171,16 +186,25 @@ int main(void)
 
 			auto modelPtr = registry.GetComponent<ModelComponent>(modelID);
 			auto& model = modelPtr->model;
+
+			/*
+			std::cout << model.mesh.indices.size() << std::endl;
+			for (auto& index : model.mesh.indices)
+			{
+				std::cout << "Index " << index << ": (" << model.mesh.vertices[index].position.x << ", " << model.mesh.vertices[index].position.y << ", " << model.mesh.vertices[index].position.z << ")" << std::endl;
+			}
+			*/
+
 			model.mesh.vao.Bind();
 
 			glm::mat4 modelMatrix = glm::mat4(1.0f);
 			modelMatrix = glm::translate(model.position);
 
-			GLint modelLocation = glGetUniformLocation(shaderProgram.id, "m");
+			GLint modelLocation = glGetUniformLocation(shaderProgram.id, "model");
 			glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-			GLint viewLocation = glGetUniformLocation(shaderProgram.id, "v");
+			GLint viewLocation = glGetUniformLocation(shaderProgram.id, "view");
 			glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(camera.ViewMatrix()));
-			GLint projLocation = glGetUniformLocation(shaderProgram.id, "p");
+			GLint projLocation = glGetUniformLocation(shaderProgram.id, "proj");
 			glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(camera.ProjectionMatrix(45.0f, 0.1f, 100.0f)));
 
 			model.mesh.texture.Uniform(shaderProgram, "tex0", 0);
@@ -188,7 +212,7 @@ int main(void)
 
 			glDrawElements(GL_TRIANGLES, model.mesh.indices.size(), GL_UNSIGNED_INT, 0);
 		}
-		*/
+
 		glfwSwapBuffers(window);
 
 		glfwPollEvents();

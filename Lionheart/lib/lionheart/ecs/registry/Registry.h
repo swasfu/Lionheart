@@ -96,7 +96,7 @@ std::vector<EntityID> Registry::ViewIDs()
 template<typename T>
 std::vector<EntityID> Registry::ViewIDs()
 {
-	auto matchingIDs = std::vector<EntityID>();
+	std::vector<EntityID> matchingIDs;
 	auto& componentMap = GetComponentMap<T>();
 	for (auto& componentMapItr : componentMap)
 	{

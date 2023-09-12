@@ -83,6 +83,9 @@
     <None Include="lib\1240\components\creatures\BodyPartAttachedComponent.h" />
     <None Include="data\shaders\default.frag" />
     <None Include="data\shaders\default.vert" />
+    <None Include="data\shaders\basicVertexShader.glsl" />
+    <None Include="data\shaders\basicFragmentShader.glsl" />
+    <None Include="data\shaders\defaultVertexShader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="obj\glfw\glfw3.lib" />
