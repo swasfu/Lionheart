@@ -20,12 +20,14 @@
 
 #include <iostream>
 
-int windowWidth = 800;
-int windowHeight = 800;
+int windowWidth = 1920;
+int windowHeight = 1080;
 
 int main(void)
 {
 	Registry registry;
+
+	srand(time(nullptr));
 
 	if (!glfwInit())
 		exit(EXIT_FAILURE);
@@ -43,57 +45,53 @@ int main(void)
 
 	glEnable(GL_DEPTH_TEST);
 
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+
 	GLShaderProgram shaderProgram("data/shaders/defaultVertexShader.glsl", "data/shaders/basicFragmentShader.glsl");
 	shaderProgram.Use();
 
-	GLCamera camera(windowWidth, windowHeight, glm::vec3(0.0f, 0.0f, 2.0f));
+	float cameraDepth = 2.0f;
+	float cameraMoveSpeed = 0.01f;
+	float cameraZoomSpeed = 0.01f;
+	float fov = 5.0f + cameraDepth * 15.0f;
 
-	GLVertex testRightVertex;
-	testRightVertex.position = glm::vec3(1.0f, 0.0f, 0.0f);
-	testRightVertex.colour = glm::vec3(1.0f);
-	GLVertex testTopVertex;
-	testTopVertex.position = glm::vec3(0.0f, 1.0f, 0.0f);
-	testTopVertex.colour = glm::vec3(1.0f);
-	GLVertex testLeftVertex;
-	testLeftVertex.position = glm::vec3(-1.0f, 0.0f, 0.0f);
-	testLeftVertex.colour = glm::vec3(1.0f);
-	std::vector<GLVertex> testVertices = { testRightVertex, testTopVertex, testLeftVertex };
-	std::vector<GLuint> testIndices = { 0, 1, 2 };
-	GLTexture testTexture;
+	GLCamera camera(windowWidth, windowHeight, glm::vec3(0.0f, 0.0f, cameraDepth));
 
-	GLMesh testMesh(testVertices, testIndices, testTexture);
-
-	GLModel testModel = GLModel(testMesh);
-
-	World::GenerateTiles(&registry, 1.0f, 20);
+	World::GenerateTiles(&registry, 1.0f, 200);
 
 	while (!glfwWindowShouldClose(window))
 	{
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		{
-			camera.position += glm::normalize(camera.orientation) * camera.speed;
+			camera.position += glm::normalize(camera.up) * cameraMoveSpeed;
 		}
 		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 		{
-			camera.position -= glm::normalize(camera.orientation) * camera.speed;
+			camera.position -= glm::normalize(camera.up) * cameraMoveSpeed;
 		}
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		{
-			camera.position += glm::normalize(glm::cross(camera.orientation, camera.up)) * camera.speed;
+			camera.position += glm::normalize(glm::cross(camera.orientation, camera.up)) * cameraMoveSpeed;
 		}
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 		{
-			camera.position -= glm::normalize(glm::cross(camera.orientation, camera.up)) * camera.speed;
+			camera.position -= glm::normalize(glm::cross(camera.orientation, camera.up)) * cameraMoveSpeed;
 		}
 		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
 		{
-			camera.position += glm::normalize(camera.up) * camera.speed;
+			cameraDepth += cameraZoomSpeed;
 		}
 		if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 		{
-			camera.position -= glm::normalize(camera.up) * camera.speed;
+			cameraDepth -= cameraZoomSpeed;
 		}
 
+		fov = 15.0f + cameraDepth * 15.0f;
+		camera.position = glm::normalize(camera.position) * cameraDepth;
+		camera.orientation = -camera.position;
+
+		/*
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 		{
 			double mouseX;
@@ -113,70 +111,11 @@ int main(void)
 
 			camera.orientation = glm::rotate(camera.orientation, glm::radians(-rotY), camera.up);
 		}
+		*/
 
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		/*
-		GLuint vbo;
-		glGenBuffers(1, &vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, testVertices.size() * sizeof(GLVertex), testVertices.data(), GL_STATIC_DRAW);
-
-		GLuint vao;
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
-
-		GLuint ebo;
-		glGenBuffers(1, &ebo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, testIndices.size() * sizeof(GLuint), testIndices.data(), GL_STATIC_DRAW);
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLVertex), (void*)0);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLVertex), (void*)(1 * sizeof(glm::vec3)));
-		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(GLVertex), (void*)(2 * sizeof(glm::vec3)));
-		glEnableVertexAttribArray(0);
-		glEnableVertexAttribArray(1);
-		glEnableVertexAttribArray(2);
-
-		shaderProgram.Use();
-
-		glm::mat4 testModelMatrix = glm::mat4(1.0f);
-		glm::mat4 testViewMatrix = glm::mat4(1.0f);
-		glm::mat4 testProjMatrix = glm::mat4(1.0f);
-
-		GLint testModelLocation = glGetUniformLocation(shaderProgram.id, "model");
-		glUniformMatrix4fv(testModelLocation, 1, GL_FALSE, glm::value_ptr(testModelMatrix));
-		GLint testViewLocation = glGetUniformLocation(shaderProgram.id, "view");
-		glUniformMatrix4fv(testViewLocation, 1, GL_FALSE, glm::value_ptr(testViewMatrix));
-		GLint testProjLocation = glGetUniformLocation(shaderProgram.id, "proj");
-		glUniformMatrix4fv(testProjLocation, 1, GL_FALSE, glm::value_ptr(testProjMatrix));
-
-		glBindVertexArray(vao);
-		glDrawElements(GL_TRIANGLES, testIndices.size(), GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
-		*/
-
-		/*
-		testModel.mesh.vao.Bind();
-
-		glm::mat4 testModelMatrix = glm::mat4(1.0f);
-		testModelMatrix = glm::translate(testModel.position);
-		glm::mat4 testViewMatrix = glm::mat4(1.0f);
-		glm::mat4 testProjMatrix = glm::mat4(1.0f);
-
-		GLint testModelLocation = glGetUniformLocation(shaderProgram.id, "model");
-		glUniformMatrix4fv(testModelLocation, 1, GL_FALSE, glm::value_ptr(testModelMatrix));
-		GLint testViewLocation = glGetUniformLocation(shaderProgram.id, "view");
-		glUniformMatrix4fv(testViewLocation, 1, GL_FALSE, glm::value_ptr(camera.ViewMatrix()));
-		GLint testProjLocation = glGetUniformLocation(shaderProgram.id, "proj");
-		glUniformMatrix4fv(testProjLocation, 1, GL_FALSE, glm::value_ptr(camera.ProjectionMatrix(45.0f, 0.01f, 100.0f)));
-
-		testModel.mesh.texture.Uniform(shaderProgram, "tex0", 0);
-		testModel.mesh.texture.Bind();
-
-		glDrawElements(GL_TRIANGLES, testIndices.size(), GL_UNSIGNED_INT, 0);
-		*/
+		glEnable(GL_CULL_FACE);
 
 		auto modelIDs = registry.ViewIDs<ModelComponent>();
 
@@ -186,14 +125,6 @@ int main(void)
 
 			auto modelPtr = registry.GetComponent<ModelComponent>(modelID);
 			auto& model = modelPtr->model;
-
-			/*
-			std::cout << model.mesh.indices.size() << std::endl;
-			for (auto& index : model.mesh.indices)
-			{
-				std::cout << "Index " << index << ": (" << model.mesh.vertices[index].position.x << ", " << model.mesh.vertices[index].position.y << ", " << model.mesh.vertices[index].position.z << ")" << std::endl;
-			}
-			*/
 
 			model.mesh.vao.Bind();
 
@@ -205,10 +136,7 @@ int main(void)
 			GLint viewLocation = glGetUniformLocation(shaderProgram.id, "view");
 			glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(camera.ViewMatrix()));
 			GLint projLocation = glGetUniformLocation(shaderProgram.id, "proj");
-			glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(camera.ProjectionMatrix(45.0f, 0.1f, 100.0f)));
-
-			model.mesh.texture.Uniform(shaderProgram, "tex0", 0);
-			model.mesh.texture.Bind();
+			glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(camera.ProjectionMatrix(fov, 0.1f, 100.0f)));
 
 			glDrawElements(GL_TRIANGLES, model.mesh.indices.size(), GL_UNSIGNED_INT, 0);
 		}

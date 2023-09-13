@@ -190,12 +190,12 @@
     <ClInclude Include="lib\math\polygons\Polyhedron.h" />
     <ClInclude Include="lib\math\polygons\Polygon.h" />
     <ClInclude Include="lib\math\polygons\PolyVertex.h" />
-    <ClInclude Include="lib\math\Vector3.h" />
     <ClInclude Include="lib\thirdparty\pugixml\pugiconfig.hpp" />
     <ClInclude Include="lib\thirdparty\pugixml\pugixml.hpp" />
     <ClInclude Include="lib\thirdparty\stb\stb_image.h" />
     <ClInclude Include="lib\worldgen\components\ModelComponent.h" />
     <ClInclude Include="lib\worldgen\components\TileComponent.h" />
+    <ClInclude Include="lib\worldgen\components\WorldComponent.h" />
     <ClInclude Include="lib\worldgen\World.h" />
   </ItemGroup>
   <ItemGroup>
@@ -212,7 +212,6 @@
     <ClCompile Include="lib\math\polygons\Polygon.cpp" />
     <ClCompile Include="lib\math\polygons\Polyhedron.cpp" />
     <ClCompile Include="lib\math\polygons\PolyVertex.cpp" />
-    <ClCompile Include="lib\math\Vector3.cpp" />
     <ClCompile Include="lib\thirdparty\pugixml\pugixml.cpp" />
     <ClCompile Include="lib\thirdparty\stb\stb_image.cpp" />
     <ClCompile Include="lib\worldgen\World.cpp" />

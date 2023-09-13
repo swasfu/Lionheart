@@ -11,6 +11,12 @@ PolyVertex* Polyhedron::AddVertexIfNotExists(PolyVertex newVertex)
 	return vertices[vertices.size() - 1].get();
 }
 
+PolyVertex* Polyhedron::AddVertex(PolyVertex newVertex)
+{
+	vertices.push_back(std::make_unique<PolyVertex>(newVertex));
+	return vertices[vertices.size() - 1].get();
+}
+
 Polygon* Polyhedron::AddFaceIfNotExists(Polygon newFace)
 {
 	std::sort(newFace.vertices.begin(), newFace.vertices.end());
@@ -20,6 +26,17 @@ Polygon* Polyhedron::AddFaceIfNotExists(Polygon newFace)
 		if (face->vertices == newFace.vertices) return face.get();
 	}
 
+	faces.push_back(std::make_unique<Polygon>(newFace));
+	auto face = faces[faces.size() - 1].get();
+	for (auto& vertex : face->vertices)
+	{
+		vertex->memberPolygons.push_back(face);
+	}
+	return face;
+}
+
+Polygon* Polyhedron::AddFace(Polygon newFace)
+{
 	faces.push_back(std::make_unique<Polygon>(newFace));
 	auto face = faces[faces.size() - 1].get();
 	for (auto& vertex : face->vertices)

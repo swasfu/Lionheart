@@ -3,7 +3,7 @@
 
 #include <map>
 
-Polygon::Polygon(std::vector<PolyVertex*>& vertices) : vertices(vertices) {}
+Polygon::Polygon(std::vector<PolyVertex*> vertices) : vertices(vertices) {}
 
 glm::vec3 Polygon::Centre()
 {
@@ -23,7 +23,7 @@ glm::vec3 Polygon::Normal()
 
 	glm::vec3 cross = glm::cross(AB, AC);
 
-	return cross / glm::length(cross);
+	return glm::normalize(cross);
 }
 
 bool Polygon::HasOutwardNormal()

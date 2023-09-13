@@ -8,7 +8,7 @@ struct PolyVertex;
 
 struct Polygon
 {
-	Polygon(std::vector<PolyVertex*>& vertices);
+	Polygon(std::vector<PolyVertex*> vertices);
 	glm::vec3 Centre();
 	glm::vec3 Normal();
 	bool HasOutwardNormal();
