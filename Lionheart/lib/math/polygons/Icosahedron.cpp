@@ -6,7 +6,7 @@
 
 Icosahedron::Icosahedron(float size) : Polyhedron()
 {
-	const float tao = constants::PI / 2;
+	const float tao = Constants::PI / 2;
 
 	vertices.reserve(12);
 	vertices.push_back(std::make_unique<PolyVertex>(PolyVertex(glm::vec3(size, tao * size, 0))));

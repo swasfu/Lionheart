@@ -8,10 +8,7 @@ struct PolyVertex;
 
 struct Polygon
 {
-	Polygon(std::vector<PolyVertex*> vertices);
-	glm::vec3 Centre();
-	glm::vec3 Normal();
-	bool HasOutwardNormal();
-	std::vector<PolyVertex*> WindOutward(bool);
+	Polygon(std::vector<PolyVertex*>& vertices);
+	glm::vec3 Centroid();
 	std::vector<PolyVertex*> vertices;
 };

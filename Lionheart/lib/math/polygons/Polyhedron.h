@@ -10,13 +10,11 @@
 class Polyhedron
 {
 public:
-	PolyVertex* AddVertexIfNotExists(PolyVertex newVertex);
-	PolyVertex* AddVertex(PolyVertex newVertex);
-	Polygon* AddFaceIfNotExists(Polygon newFace);
-	Polygon* AddFace(Polygon newFace);
-	void RemoveFace(Polygon*);
+	//PolyVertex* AddVertexIfNotExists(PolyVertex newVertex);
+	PolyVertex* AddVertex(PolyVertex& newVertex);
+	//Polygon* AddFaceIfNotExists(Polygon newFace);
+	Polygon* AddFace(Polygon& newFace);
+	//void RemoveFace(Polygon*);
 	std::vector<std::unique_ptr<PolyVertex>> vertices;
 	std::vector<std::unique_ptr<Polygon>> faces;
-private:
-	const float accuracy_ = 0.0001f;
 };

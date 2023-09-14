@@ -27,8 +27,6 @@ int main(void)
 {
 	Registry registry;
 
-	srand(time(nullptr));
-
 	if (!glfwInit())
 		exit(EXIT_FAILURE);
 
@@ -51,14 +49,14 @@ int main(void)
 	GLShaderProgram shaderProgram("data/shaders/defaultVertexShader.glsl", "data/shaders/basicFragmentShader.glsl");
 	shaderProgram.Use();
 
-	float cameraDepth = 2.0f;
-	float cameraMoveSpeed = 0.01f;
+	float cameraDepth = 12.0f;
+	float cameraMoveSpeed = 0.015f;
 	float cameraZoomSpeed = 0.01f;
-	float fov = 5.0f + cameraDepth * 15.0f;
+	float fov = 75.0f;
 
 	GLCamera camera(windowWidth, windowHeight, glm::vec3(0.0f, 0.0f, cameraDepth));
 
-	World::GenerateTiles(&registry, 1.0f, 200);
+	World::GenerateTiles(&registry, 10.0f, 50);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -87,7 +85,7 @@ int main(void)
 			cameraDepth -= cameraZoomSpeed;
 		}
 
-		fov = 15.0f + cameraDepth * 15.0f;
+		//fov = 15.0f + cameraDepth * 15.0f;
 		camera.position = glm::normalize(camera.position) * cameraDepth;
 		camera.orientation = -camera.position;
 
@@ -136,7 +134,7 @@ int main(void)
 			GLint viewLocation = glGetUniformLocation(shaderProgram.id, "view");
 			glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(camera.ViewMatrix()));
 			GLint projLocation = glGetUniformLocation(shaderProgram.id, "proj");
-			glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(camera.ProjectionMatrix(fov, 0.1f, 100.0f)));
+			glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(camera.ProjectionMatrix(fov, 0.001f, 100.0f)));
 
 			glDrawElements(GL_TRIANGLES, model.mesh.indices.size(), GL_UNSIGNED_INT, 0);
 		}

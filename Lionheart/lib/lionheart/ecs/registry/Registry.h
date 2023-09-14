@@ -23,8 +23,8 @@ public:
 	template<typename T>
 	T* AddComponent(EntityID);
 
-	template<typename... Ts>
-	std::vector<std::tuple<Ts...>>& View();
+	template<typename T>
+	std::vector<T*> View();
 
 	template<typename T1, typename T2, typename... Ts>
 	std::vector<EntityID> ViewIDs();
@@ -68,14 +68,19 @@ T* Registry::GetComponent(EntityID id)
 	return static_cast<T*>(componentMap[id].get());
 }
 
-template<typename... Ts>
-std::vector<std::tuple<Ts...>>& Registry::View()
+template<typename T>
+std::vector<T*> Registry::View()
 {
-	auto matchingComponentTuples = std::vector<std::tuple<Ts...>>();
+	std::vector<T*> view;
 
-	// TODO!!!
+	auto& componentMap = GetComponentMap<T>();
 
-	return matchingComponentTuples;
+	for (auto& pair : componentMap)
+	{
+		view.push_back(static_cast<T*>(pair.second.get()));
+	}
+
+	return view;
 }
 
 template<typename T1, typename T2, typename... Ts>

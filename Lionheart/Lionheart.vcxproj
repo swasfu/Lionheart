@@ -190,6 +190,7 @@
     <ClInclude Include="lib\math\polygons\Polyhedron.h" />
     <ClInclude Include="lib\math\polygons\Polygon.h" />
     <ClInclude Include="lib\math\polygons\PolyVertex.h" />
+    <ClInclude Include="lib\math\Random.h" />
     <ClInclude Include="lib\thirdparty\pugixml\pugiconfig.hpp" />
     <ClInclude Include="lib\thirdparty\pugixml\pugixml.hpp" />
     <ClInclude Include="lib\thirdparty\stb\stb_image.h" />

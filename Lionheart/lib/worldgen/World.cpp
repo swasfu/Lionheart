@@ -5,6 +5,8 @@
 
 #include "math/polygons/Polyhedron.h"
 #include "math/polygons/Icosahedron.h"
+#include "math/Random.h"
+#include "math/Constants.h"
 
 #include <thirdparty/glm/glm.hpp>
 #include <thirdparty/glm/gtx/vector_angle.hpp>
@@ -56,7 +58,7 @@ glm::vec3 SphericalPoint(glm::vec3 point, float radius)
 	return glm::normalize(point) * radius;
 }
 
-glm::vec3 CentrePoint(std::vector<glm::vec3>& points)
+glm::vec3 Centroid(std::vector<glm::vec3>& points)
 {
 	glm::vec3 centre(0.0f);
 	for (auto& point : points) centre += point;
@@ -68,14 +70,14 @@ void WindOutward(std::vector<glm::vec3>& vertices, bool ccw)
 	std::map<float, glm::vec3> angleToVertex;
 
 
-	glm::vec3 centre = CentrePoint(vertices);
+	glm::vec3 centre = Centroid(vertices);
 
 	glm::vec3 a = vertices[0] - centre;
 
 	for (auto& vertex : vertices)
 	{
 		glm::vec3 b = vertex - centre;
-		float angle = atan2(glm::dot(glm::cross(a, b), glm::normalize(centre)), glm::dot(a, b));
+		float angle = atan2f(glm::dot(glm::cross(a, b), glm::normalize(centre)), glm::dot(a, b));
 		angleToVertex[angle] = vertex;
 	}
 
@@ -86,7 +88,7 @@ void WindOutward(std::vector<glm::vec3>& vertices, bool ccw)
 	}
 }
 
-PolyVertex* AddEdgeVertex(Polyhedron& polyhedron, PolyVertex vertex, std::vector<PolyVertex*>& edgeVertices)
+PolyVertex* AddEdgeVertex(Polyhedron& polyhedron, PolyVertex& vertex, std::vector<PolyVertex*>& edgeVertices)
 {
 	for (auto& edgeVertex : edgeVertices)
 	{
@@ -97,8 +99,36 @@ PolyVertex* AddEdgeVertex(Polyhedron& polyhedron, PolyVertex vertex, std::vector
 	return newEdgeVertex;
 }
 
+struct GlobalCoord
+{
+	float lat;
+	float lon;
+};
+
+struct AltitudeSeed
+{
+	glm::vec3 normal;
+	float altitude;
+	float magnitude;
+};
+
+GlobalCoord SphereVectorToGlobalCoord(glm::vec3 sphereVector, float sphereRadius)
+{
+	GlobalCoord globalCoord;
+	globalCoord.lat = atan2f(sphereVector.z, sqrtf(powf(sphereVector.x, 2) + powf(sphereVector.y, 2)));
+	globalCoord.lon = atan2f(sphereVector.y, sphereVector.x);
+	return globalCoord;
+}
+
+float GreatCircleDistance(glm::vec3 a, glm::vec3 b)
+{
+	return atanf(glm::length(glm::cross(a, b)) / glm::dot(a, b));
+}
+
 void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 {
+	Random::Seed();
+
 	Polyhedron icosahedron = Icosahedron(size);
 	Polyhedron geodesic;
 
@@ -113,6 +143,7 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	int edgeCount = 0;
 	int innerCount = 0;
 	//std::chrono::milliseconds averageFace{ 0 };
+	std::unordered_map<PolyVertex*, float> vertexAltitudes;
 	for (auto& face : icosahedron.faces)
 	{
 		glm::vec3 a = face->vertices[0]->coords;
@@ -123,31 +154,29 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 		glm::vec3 ac = (c - a) / (float)subdivisions;
 		glm::vec3 bc = (c - b) / (float)subdivisions;
 
-		struct TriangleCoord
-		{
-			int i, j;
-		};
-
 		std::vector<PolyVertex*> vertices;
 		vertices.reserve(((2 + subdivisions) * (1 + subdivisions)) / 2);
 		for (int i = 0; i < subdivisions + 1; i++)
 		{
-			vertices.push_back(AddEdgeVertex(geodesic, PolyVertex(a), edgeVertices));
+			PolyVertex nextA = PolyVertex(a);
+			vertices.push_back(AddEdgeVertex(geodesic, nextA, edgeVertices));
 			c = a;
 			for (int j = 1; j < subdivisions + 1 - i; j++)
 			{
 				c += ac;
+				PolyVertex nextC = PolyVertex(c);
 				if (i == 0 || j == (subdivisions - i))
 				{
 					//begin = std::chrono::steady_clock::now();
-					vertices.push_back(AddEdgeVertex(geodesic, PolyVertex(c), edgeVertices));
+					PolyVertex nextC = PolyVertex(c);
+					vertices.push_back(AddEdgeVertex(geodesic, nextC, edgeVertices));
 					//end = std::chrono::steady_clock::now();
 					//averageEdgeVertex += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
 					//edgeCount++;
 				} else
 				{
 					//begin = std::chrono::steady_clock::now();
-					vertices.push_back(geodesic.AddVertex(PolyVertex(c)));
+					vertices.push_back(geodesic.AddVertex(nextC));
 					//end = std::chrono::steady_clock::now();
 					//averageInnerVertex += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
 					//innerCount++;
@@ -162,8 +191,15 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 		{
 			for (int j = 0; j < i; j++)
 			{
-				geodesic.AddFace(Polygon({ vertices[count], vertices[count + 1], vertices[count + i + 1] }));
-				if (j != 0) geodesic.AddFace(Polygon({ vertices[count], vertices[count + i], vertices[count + i + 1] }));
+				std::vector<PolyVertex*> forwardVertices = { vertices[count], vertices[count + 1], vertices[count + i + 1] };
+				Polygon forwardTriangle = Polygon(forwardVertices);
+				geodesic.AddFace(forwardTriangle);
+				if (j != 0)
+				{
+					std::vector<PolyVertex*> backwardVertices = { vertices[count], vertices[count + i], vertices[count + i + 1] };
+					Polygon backwardTriangle = Polygon(backwardVertices);
+					geodesic.AddFace(backwardTriangle);
+				}
 				count++;
 			}
 			count++;
@@ -173,8 +209,7 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	}
 	end = std::chrono::steady_clock::now();
 	std::cout << " done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
-	std::cout << "Geodesic vertex count: " << geodesic.vertices.size() << std::endl;
-	std::cout << "Geodesic face count: " << geodesic.faces.size() << std::endl;
+
 	/*
 	for (auto& face : icosahedron.faces)
 	{
@@ -266,37 +301,13 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	end = std::chrono::steady_clock::now();
 	std::cout << " done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
 
-	/*
-	std::cout << "Generating Goldberg Polyhedron...";
-	begin = std::chrono::steady_clock::now();
-	Polyhedron goldberg;
-	std::unordered_map<Polygon*, EntityID> tileToEntityID;
-	std::unordered_map<Polygon*, std::vector<PolyVertex*>> tileToNeighbourVertexPtrs;
-	std::unordered_map<PolyVertex*, Polygon*> vertexPtrToTile;
-	for (auto& vertex : geodesic.vertices)
-	{
-		std::vector<PolyVertex*> tileVertices;
-		std::vector<PolyVertex*> neighbourVertices;
-		for (auto& memberPolygon : vertex->memberPolygons)
-		{
-			for (auto& neighbourVertex : memberPolygon->vertices)
-			{
-				if (neighbourVertex != vertex.get()) neighbourVertices.push_back(neighbourVertex);
-			}
-			PolyVertex* centreVertex = goldberg.AddVertexIfNotExists(memberPolygon->Centre());
-			tileVertices.push_back(centreVertex);
-		}
-
-		Polygon* tileFace = goldberg.AddFaceIfNotExists(Polygon(tileVertices));
-		vertexPtrToTile[vertex.get()] = tileFace;
-		tileToNeighbourVertexPtrs[tileFace] = neighbourVertices;
-	}
-	end = std::chrono::steady_clock::now();
-	std::cout << " done, " << std::chrono::duration_cast<std::chrono::ms>(end - begin).count() << "ms" << std::endl;
-	*/
 	std::cout << "Generating GL data...";
+	begin = std::chrono::steady_clock::now();
 	EntityID worldID = registry->RegisterEntity();
 	ModelComponent* worldModel = registry->AddComponent<ModelComponent>(worldID);
+	float altitudeRange = 1.0f;
+	std::map<TileComponent*, std::vector<int>> tileToVertexIndices;
+	/*
 	std::chrono::milliseconds regTime{ 0 };
 	std::chrono::milliseconds compTime{ 0 };
 	std::chrono::milliseconds windTime{ 0 };
@@ -305,37 +316,41 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	std::chrono::milliseconds textureTime{ 0 };
 	std::chrono::milliseconds meshInitTime{ 0 };
 	std::chrono::milliseconds modelInitTime{ 0 };
+	*/
 	for (auto& vertex : geodesic.vertices)
 	{
 		// Register tile entity
-		begin = std::chrono::steady_clock::now();
+		//begin = std::chrono::steady_clock::now();
 		EntityID tileEntityID = registry->RegisterEntity();
-		end = std::chrono::steady_clock::now();
-		regTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+		//end = std::chrono::steady_clock::now();
+		//regTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
 
 		// Generate tile components
-		begin = std::chrono::steady_clock::now();
-		TileComponent* tileComponentPtr = registry->AddComponent<TileComponent>(tileEntityID);
-		end = std::chrono::steady_clock::now();
-		compTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+		//begin = std::chrono::steady_clock::now();
+		TileComponent* tileComponent = registry->AddComponent<TileComponent>(tileEntityID);
+		tileComponent->altitude = Random::RandomFloat(0.0f, 0.05f);
+		tileComponent->worldID = worldID;
+		//end = std::chrono::steady_clock::now();
+		//compTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
 
 		// Wind vertices counter clockwise
-		begin = std::chrono::steady_clock::now();
+		//begin = std::chrono::steady_clock::now();
 		std::vector<glm::vec3> centreVertices;
 		for (auto& memberPolygon : vertex->memberPolygons)
 		{
-			centreVertices.push_back(memberPolygon->Centre());
+			centreVertices.push_back(memberPolygon->Centroid());
 		}
 		WindOutward(centreVertices, true);
-		end = std::chrono::steady_clock::now();
-		windTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+		//end = std::chrono::steady_clock::now();
+		//windTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
 
 		// Generate GLVertices from goldberg data
-		begin = std::chrono::steady_clock::now();
+		//begin = std::chrono::steady_clock::now();
 		std::vector<GLVertex> vertices;
-		glm::vec3 tileNormal = glm::normalize(CentrePoint(centreVertices));
-		glm::vec3 faceColour = glm::vec3(((float)rand() / RAND_MAX), ((float)rand() / RAND_MAX), ((float)rand() / RAND_MAX));
-		//glm::vec3 faceColour = glm::vec3(0.05f, ((float)rand() / RAND_MAX) * 0.1f + 0.2f, 0.125f);
+		glm::vec3 tileNormal = glm::normalize(Centroid(centreVertices));
+		tileComponent->normal = tileNormal;
+		//glm::vec3 faceColour = glm::vec3(((float)rand() / RAND_MAX), ((float)rand() / RAND_MAX), ((float)rand() / RAND_MAX));
+		//glm::vec3 faceColour = glm::vec3(0.05f, tileComponent->altitude, 0.125f);
 		//glm::vec3 faceColour = orderedVertices.size() == 6 ? glm::vec3(1.0f, 0.1f, 0.1f) : glm::vec3(0.1f);
 		//glm::vec3 faceColour = centreVertices.size() == 6 ? glm::vec3(0.8f, 0.9f, ((float)rand() / RAND_MAX) * 0.1f + 0.9f) : glm::vec3(1.0f, 0.2f, 0.2f);
 		int oldVertexCount = worldModel->model.mesh.vertices.size();
@@ -344,16 +359,17 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 			GLVertex newVertex;
 			newVertex.position = vertex;
 			newVertex.normal = tileNormal;
-			newVertex.colour = faceColour;
+			//newVertex.colour = faceColour;
 			newVertex.texUV = glm::vec2(0.0f);
 
 			worldModel->model.mesh.vertices.push_back(newVertex);
+			tileToVertexIndices[tileComponent].push_back(worldModel->model.mesh.vertices.size() - 1);
 		}
-		end = std::chrono::steady_clock::now();
-		glVertexTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+		//end = std::chrono::steady_clock::now();
+		//glVertexTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
 
 		// Generate triangle indices to cover tile face
-		begin = std::chrono::steady_clock::now();
+		//begin = std::chrono::steady_clock::now();
 		std::vector<GLuint> indices = std::vector<GLuint>();
 		for (int i = 1; i < centreVertices.size() - 1; i++)
 		{
@@ -361,17 +377,19 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 			worldModel->model.mesh.indices.push_back(oldVertexCount + i);
 			worldModel->model.mesh.indices.push_back(oldVertexCount + i + 1);
 		}
-		end = std::chrono::steady_clock::now();
-		indexTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+		//end = std::chrono::steady_clock::now();
+		//indexTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
 
 		// Initialise GLTexture for tile model mesh
-		begin = std::chrono::steady_clock::now();
+		//begin = std::chrono::steady_clock::now();
 		GLTexture tileTexture;//("data/textures/brick.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-		end = std::chrono::steady_clock::now();
-		textureTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+		//end = std::chrono::steady_clock::now();
+		//textureTime += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
 	}
-	worldModel->model.mesh.Setup();
-	std::cout << std::endl;
+	end = std::chrono::steady_clock::now();
+	std::cout << "done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
+
+	/*std::cout << std::endl;
 	std::cout << "     Average entity registry time: " << (regTime / geodesic.vertices.size()).count() << "ms" << std::endl;
 	std::cout << "  Average component creation time: " << (compTime / geodesic.vertices.size()).count() << "ms" << std::endl;
 	std::cout << "      Average vertex winding time: " << (windTime / geodesic.vertices.size()).count() << "ms" << std::endl;
@@ -379,8 +397,7 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	std::cout << "      Average index creation time: " << (indexTime / geodesic.vertices.size()).count() << "ms" << std::endl;
 	std::cout << "    Average texture creation time: " << (textureTime / geodesic.vertices.size()).count() << "ms" << std::endl;
 	std::cout << " Average mesh initialisation time: " << (meshInitTime / geodesic.vertices.size()).count() << "ms" << std::endl;
-	std::cout << "Average model initialisation time: " << (modelInitTime / geodesic.vertices.size()).count() << "ms" << std::endl;
-
+	std::cout << "Average model initialisation time: " << (modelInitTime / geodesic.vertices.size()).count() << "ms" << std::endl;*/ // old GL time testing
 	/*
 	std::cout << "Resolving tile neighbours...";
 	begin = std::chrono::steady_clock::now();
@@ -397,7 +414,7 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	}
 	end = std::chrono::steady_clock::now();
 	std::cout << " done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " milliseconds" << std::endl;
-	*/
+	*/ // old tile neighbour resolution
 	/*
 	// Generate terrain
 	std::cout << "Generating initial terrain quadrants...";
@@ -493,5 +510,48 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	}
 	end = std::chrono::steady_clock::now();
 	std::cout << " done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " milliseconds" << std::endl;
-	*/
+	*/ // old terrain generation
+
+	std::vector<AltitudeSeed> altitudeSeeds;
+	for (int i = 0; i < 100; i++)
+	{
+		altitudeSeeds.push_back(AltitudeSeed{
+			glm::normalize(glm::vec3{ Random::RandomFloat(-1.0f, 2.0f), Random::RandomFloat(-1.0f, 2.0f), Random::RandomFloat(-1.0f, 2.0f) }),
+			Random::RandomFloat(0.4f, 0.8f),
+			Random::RandomFloat(0.0f, 1.0f) });
+	}
+
+	float seaLevel = 0.5f;
+	auto tiles = registry->View<TileComponent>();
+	float avgAltitude = 0.0f;
+	for (auto& tile : tiles)
+	{
+		float totalEffect = 0.0f;
+		for (auto& altitudeSeed : altitudeSeeds)
+		{
+			float distance = GreatCircleDistance(tile->normal, altitudeSeed.normal);
+			totalEffect += altitudeSeed.magnitude * altitudeSeed.altitude / distance;
+		}
+		totalEffect /= altitudeSeeds.size();
+		tile->altitude += totalEffect;
+		avgAltitude += tile->altitude;
+	}
+	avgAltitude /= tiles.size();
+
+	for (auto& tile : tiles)
+	{
+		glm::vec3 land = glm::vec3(0.02f, 0.6f - (tile->altitude - avgAltitude), 0.125f);
+		glm::vec3 water = glm::vec3(0.02f, 0.8f - abs(tile->altitude - avgAltitude), 0.95f);
+		glm::vec3 colour = tile->altitude >= avgAltitude ? land : water;
+
+		for (auto& vertexIndex : tileToVertexIndices[tile])
+		{
+			worldModel->model.mesh.vertices[vertexIndex].colour = colour;
+		}
+	}
+
+	worldModel->model.mesh.Setup();
+
+	std::cout << "Geodesic vertex count: " << geodesic.vertices.size() << std::endl;
+	std::cout << "Geodesic face count: " << geodesic.faces.size() << std::endl;
 }
