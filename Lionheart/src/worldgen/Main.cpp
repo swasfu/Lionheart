@@ -51,11 +51,11 @@ int main(void)
 	float worldSize = 10.0f;
 
 	float cameraDepth = 12.0f;
-	float cameraMoveSpeed = 0.015f * worldSize;
+	float cameraMoveSpeed = 0.005f * worldSize;
 	float cameraZoomSpeed = 0.01f * worldSize;
 	float fov = 75.0f;
 
-	GLCamera camera(windowWidth, windowHeight, glm::vec3(0.0f, 0.0f, cameraDepth));
+	GLCamera camera(windowWidth, windowHeight);
 
 	shaderProgram.Use();
 
@@ -65,25 +65,25 @@ int main(void)
 	glUniform4f(glGetUniformLocation(shaderProgram.id, "lightColour"), lightColour.x, lightColour.y, lightColour.z, lightColour.w);
 	glUniform3f(glGetUniformLocation(shaderProgram.id, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
-	World::GenerateTiles(&registry, worldSize, 200);
+	World::GenerateTiles(&registry, worldSize, 50);
 
 	while (!glfwWindowShouldClose(window))
 	{
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		{
-			camera.position += glm::normalize(camera.up) * cameraMoveSpeed;
+			camera.orientation -= glm::normalize(camera.up) * cameraMoveSpeed;
 		}
 		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 		{
-			camera.position -= glm::normalize(camera.up) * cameraMoveSpeed;
+			camera.orientation += glm::normalize(camera.up) * cameraMoveSpeed;
 		}
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		{
-			camera.position += glm::normalize(glm::cross(camera.orientation, camera.up)) * cameraMoveSpeed;
+			camera.orientation -= glm::normalize(glm::cross(camera.orientation, camera.up)) * cameraMoveSpeed;
 		}
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 		{
-			camera.position -= glm::normalize(glm::cross(camera.orientation, camera.up)) * cameraMoveSpeed;
+			camera.orientation += glm::normalize(glm::cross(camera.orientation, camera.up)) * cameraMoveSpeed;
 		}
 		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
 		{
@@ -94,8 +94,7 @@ int main(void)
 			cameraDepth -= cameraZoomSpeed;
 		}
 
-		camera.position = glm::normalize(camera.position) * cameraDepth;
-		camera.orientation = -camera.position;
+		camera.position = -glm::normalize(camera.orientation) * cameraDepth;
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

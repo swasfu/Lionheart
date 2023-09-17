@@ -6,7 +6,7 @@
 class GLCamera
 {
 public:
-	GLCamera(int width, int height, glm::vec3 position);
+	GLCamera(int width, int height);
 	glm::vec3 position;
 	glm::vec3 orientation;
 	glm::vec3 up;
@@ -17,7 +17,6 @@ public:
 	float speed = 0.01f;
 	float sensitivity = 1.0f;
 
-	glm::mat4 ViewProjectionMatrix(float fov, float near, float far);
 	glm::mat4 ViewMatrix();
 	glm::mat4 ProjectionMatrix(float fov, float near, float far);
 };
