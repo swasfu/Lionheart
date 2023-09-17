@@ -1,10 +1,6 @@
 #pragma once
 
-#include "math/polygons/Polyhedron.h"
-#include "lionheart/ecs/registry/Registry.h"
-
-#include <vector>
-#include <memory>
+#include "lionheart/ecs/Registry.h"
 
 class World
 {

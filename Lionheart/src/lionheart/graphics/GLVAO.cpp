@@ -1,4 +1,4 @@
-#include "GLVAO.h"
+#include "lionheart/graphics/GLVAO.h"
 
 GLVAO::GLVAO()
 {

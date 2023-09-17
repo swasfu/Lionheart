@@ -170,11 +170,11 @@
     <ClInclude Include="lib\1240\components\RotationComponent.h" />
     <ClInclude Include="lib\1240\components\TransformComponent.h" />
     <ClInclude Include="lib\1240\systems\TestSystem.h" />
-    <ClInclude Include="lib\lionheart\ecs\registry\ComponentBase.h" />
+    <ClInclude Include="lib\lionheart\ecs\ComponentBase.h" />
     <ClInclude Include="lib\1240\components\FlagsComponent.h" />
-    <ClInclude Include="lib\lionheart\ecs\registry\Registry.h" />
+    <ClInclude Include="lib\lionheart\ecs\Registry.h" />
     <ClInclude Include="lib\ecs\parsing\XMLParser.h" />
-    <ClInclude Include="lib\lionheart\ecs\systems\SystemBase.h" />
+    <ClInclude Include="lib\lionheart\ecs\SystemBase.h" />
     <ClInclude Include="lib\lionheart\graphics\GLCamera.h" />
     <ClInclude Include="lib\lionheart\graphics\GLEBO.h" />
     <ClInclude Include="lib\lionheart\graphics\GLMesh.h" />
@@ -186,6 +186,7 @@
     <ClInclude Include="lib\lionheart\graphics\GLVertex.h" />
     <ClInclude Include="lib\lionheart\util\File.h" />
     <ClInclude Include="lib\math\Constants.h" />
+    <ClInclude Include="lib\math\polygons\Cube.h" />
     <ClInclude Include="lib\math\polygons\Icosahedron.h" />
     <ClInclude Include="lib\math\polygons\Polyhedron.h" />
     <ClInclude Include="lib\math\polygons\Polygon.h" />
@@ -194,40 +195,43 @@
     <ClInclude Include="lib\thirdparty\pugixml\pugiconfig.hpp" />
     <ClInclude Include="lib\thirdparty\pugixml\pugixml.hpp" />
     <ClInclude Include="lib\thirdparty\stb\stb_image.h" />
+    <ClInclude Include="lib\worldgen\Fractal.h" />
+    <ClInclude Include="lib\worldgen\World.h" />
     <ClInclude Include="lib\worldgen\components\ModelComponent.h" />
     <ClInclude Include="lib\worldgen\components\TileComponent.h" />
     <ClInclude Include="lib\worldgen\components\WorldComponent.h" />
-    <ClInclude Include="lib\worldgen\World.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="lib\lionheart\graphics\GLCamera.cpp" />
-    <ClCompile Include="lib\lionheart\graphics\GLEBO.cpp" />
-    <ClCompile Include="lib\lionheart\graphics\GLMesh.cpp" />
-    <ClCompile Include="lib\lionheart\graphics\GLModel.cpp" />
-    <ClCompile Include="lib\lionheart\graphics\GLShaderProgram.cpp" />
-    <ClCompile Include="lib\lionheart\graphics\GLTexture.cpp" />
-    <ClCompile Include="lib\lionheart\graphics\GLVAO.cpp" />
-    <ClCompile Include="lib\lionheart\graphics\GLVBO.cpp" />
-    <ClCompile Include="lib\lionheart\util\File.cpp" />
-    <ClCompile Include="lib\math\polygons\Icosahedron.cpp" />
-    <ClCompile Include="lib\math\polygons\Polygon.cpp" />
-    <ClCompile Include="lib\math\polygons\Polyhedron.cpp" />
-    <ClCompile Include="lib\math\polygons\PolyVertex.cpp" />
+    <ClCompile Include="src\lionheart\ecs\Registry.cpp" />
+    <ClCompile Include="src\lionheart\graphics\GLCamera.cpp" />
+    <ClCompile Include="src\lionheart\graphics\GLEBO.cpp" />
+    <ClCompile Include="src\lionheart\graphics\GLMesh.cpp" />
+    <ClCompile Include="src\lionheart\graphics\GLModel.cpp" />
+    <ClCompile Include="src\lionheart\graphics\GLShaderProgram.cpp" />
+    <ClCompile Include="src\lionheart\graphics\GLTexture.cpp" />
+    <ClCompile Include="src\lionheart\graphics\GLVAO.cpp" />
+    <ClCompile Include="src\lionheart\graphics\GLVBO.cpp" />
+    <ClCompile Include="src\lionheart\util\File.cpp" />
+    <ClCompile Include="src\math\polygons\Cube.cpp" />
+    <ClCompile Include="src\math\polygons\Icosahedron.cpp" />
+    <ClCompile Include="src\math\polygons\Polygon.cpp" />
+    <ClCompile Include="src\math\polygons\Polyhedron.cpp" />
+    <ClCompile Include="src\math\polygons\PolyVertex.cpp" />
+    <ClCompile Include="src\math\Random.cpp" />
     <ClCompile Include="lib\thirdparty\pugixml\pugixml.cpp" />
     <ClCompile Include="lib\thirdparty\stb\stb_image.cpp" />
-    <ClCompile Include="lib\worldgen\World.cpp" />
-    <ClCompile Include="src\ecs\registry\Registry.cpp" />
-    <ClCompile Include="src\ecs\parsing\XMLParser.cpp" />
-    <ClCompile Include="lib\worldgen\Main.cpp" />
+    <ClCompile Include="src\worldgen\Fractal.cpp" />
+    <ClCompile Include="src\lionheart\parsing\XMLParser.cpp" />
+    <ClCompile Include="src\worldgen\Main.cpp" />
     <ClCompile Include="src\thirdparty\glad\gl.c" />
+    <ClCompile Include="src\worldgen\World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\shaders\basicFragmentShader.glsl" />
     <None Include="data\shaders\basicVertexShader.glsl" />
-    <None Include="data\shaders\default.frag" />
-    <None Include="data\shaders\default.vert" />
     <None Include="data\shaders\defaultVertexShader.glsl" />
     <None Include="lib\1240\components\creatures\BodyPartAttachedComponent.h" />
+    <None Include="data\shaders\defaultFragmentShader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="obj\glfw\glfw3.lib" />

@@ -5,5 +5,5 @@
 class Icosahedron : public Polyhedron
 {
 public:
-	Icosahedron(float);
+	Icosahedron(float size);
 };

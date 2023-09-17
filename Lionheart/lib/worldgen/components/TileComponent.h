@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lionheart/ecs/registry/ComponentBase.h"
+#include "lionheart/ecs/ComponentBase.h"
 #include "lionheart/parsing/XMLParser.h"
 
 struct TileComponent : public ComponentBase

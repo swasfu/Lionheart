@@ -1,4 +1,4 @@
-#include "GLTexture.h"
+#include "lionheart/graphics/GLTexture.h"
 
 GLTexture::GLTexture()
 {}

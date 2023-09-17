@@ -1,5 +1,5 @@
-#include "Polygon.h"
-#include "PolyVertex.h"
+#include "math/polygons/Polygon.h"
+#include "math/polygons/PolyVertex.h"
 
 #include <map>
 

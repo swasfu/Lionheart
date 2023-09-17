@@ -1,4 +1,4 @@
-#include "GLCamera.h"
+#include "lionheart/graphics/GLCamera.h"
 
 #include <thirdparty/glm/gtc/matrix_transform.hpp>
 

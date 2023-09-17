@@ -1,8 +1,6 @@
-#include "Icosahedron.h"
+#include "math/polygons/Icosahedron.h"
 
 #include "math/constants.h"
-
-#include <iostream>
 
 Icosahedron::Icosahedron(float size) : Polyhedron()
 {

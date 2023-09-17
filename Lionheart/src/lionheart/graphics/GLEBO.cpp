@@ -1,4 +1,4 @@
-#include "GLEBO.h"
+#include "lionheart/graphics/GLEBO.h"
 
 GLEBO::GLEBO(std::vector<GLuint>& indices)
 {

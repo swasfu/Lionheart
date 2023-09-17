@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lionheart/ecs/registry/registry.h"
+#include "lionheart/ecs/Registry.h"
 
 #include "thirdparty/pugixml/pugixml.hpp"
 

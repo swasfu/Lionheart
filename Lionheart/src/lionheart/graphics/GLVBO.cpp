@@ -1,4 +1,4 @@
-#include "GLVBO.h"
+#include "lionheart/graphics/GLVBO.h"
 
 GLVBO::GLVBO(std::vector<GLVertex>& vertices)
 {

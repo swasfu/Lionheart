@@ -1,4 +1,4 @@
-#include "lionheart/ecs/registry/registry.h"
+#include "lionheart/ecs/Registry.h"
 
 EntityID Registry::RegisterEntity()
 {

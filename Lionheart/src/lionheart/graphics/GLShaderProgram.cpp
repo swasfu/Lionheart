@@ -1,4 +1,4 @@
-#include "GLShaderProgram.h"
+#include "lionheart/graphics/GLShaderProgram.h"
 
 #include "lionheart/util/File.h"
 

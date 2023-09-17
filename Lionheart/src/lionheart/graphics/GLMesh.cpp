@@ -1,4 +1,4 @@
-#include "GLMesh.h"
+#include "lionheart/graphics/GLMesh.h"
 
 GLMesh::GLMesh()
 {}
