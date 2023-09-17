@@ -497,6 +497,7 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	std::cout << " done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " milliseconds" << std::endl;
 
 	worldModel->model.mesh.Setup();
+	worldModel->model.position.z = -20.0f;
 
 	std::cout << "Geodesic vertex count: " << geodesic.vertices.size() << std::endl;
 	std::cout << "Geodesic face count: " << geodesic.faces.size() << std::endl;

@@ -60,7 +60,7 @@ int main(void)
 	shaderProgram.Use();
 
 	glm::vec4 lightColour = glm::vec4(1.0f);
-	glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 10000.0f);
+	glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	glUniform4f(glGetUniformLocation(shaderProgram.id, "lightColour"), lightColour.x, lightColour.y, lightColour.z, lightColour.w);
 	glUniform3f(glGetUniformLocation(shaderProgram.id, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
