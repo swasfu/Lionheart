@@ -94,7 +94,7 @@ int main(void)
 			cameraDepth -= cameraZoomSpeed;
 		}
 
-		camera.position = -glm::normalize(camera.orientation) * cameraDepth;
+		camera.position += -glm::normalize(camera.orientation) * cameraDepth;
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -102,7 +102,7 @@ int main(void)
 
 		shaderProgram.Use();
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "view"), 1, GL_FALSE, glm::value_ptr(camera.ViewMatrix()));
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "proj"), 1, GL_FALSE, glm::value_ptr(camera.ProjectionMatrix(fov, 0.001f, 100.0f)));
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "projection"), 1, GL_FALSE, glm::value_ptr(camera.ProjectionMatrix(fov, 0.001f, 100.0f)));
 		glUniform3f(glGetUniformLocation(shaderProgram.id, "cameraPos"), camera.position.x, camera.position.y, camera.position.z);
 
 		auto modelIDs = registry.ViewIDs<ModelComponent>();
@@ -117,11 +117,14 @@ int main(void)
 			glm::mat4 modelMatrix = glm::mat4(1.0f);
 			modelMatrix = glm::translate(model.position);
 
-			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "model"), 1, GL_FALSE, glm::value_ptr(model.ModelMatrix()));
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "translation"), 1, GL_FALSE, glm::value_ptr(model.TranslationMatrix()));
+			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "rotation"), 1, GL_FALSE, glm::value_ptr(model.RotationMatrix()));
 
 			glDrawElements(GL_TRIANGLES, model.mesh.indices.size(), GL_UNSIGNED_INT, 0);
 
 			model.rotation.y += 0.001f;
+
+			camera.position = model.position;
 
 			std::cout << "(" << model.position.x << ", " << model.position.y << ", " << model.position.z << ")" << std::endl;
 			std::cout << "(" << model.rotation.x << ", " << model.rotation.y << ", " << model.rotation.z << ")" << std::endl;

@@ -8,14 +8,16 @@ out vec3 vColour;
 out vec3 vNormal;
 out vec3 vPosition;
 
-uniform mat4 model;
+uniform mat4 translation;
+uniform mat4 rotation;
 uniform mat4 view;
-uniform mat4 proj;
+uniform mat4 projection;
 
 void main()
 {
-	vPosition = vec3(model * vec4(dPosition, 1.0f));
+	vec4 position = translation * rotation * vec4(dPosition, 1.0f);
+	vPosition = vec3(position);
 	vColour = dColour;
-	vNormal = vec3(model * vec4(dNormal, 1.0f));
-	gl_Position = proj * view * vec4(vPosition, 1.0);
+	vNormal = vec3(rotation * vec4(dNormal, 1.0f));
+	gl_Position = projection * view * position;
 }
