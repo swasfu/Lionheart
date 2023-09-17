@@ -106,7 +106,7 @@ int main(void)
 		glUniform3f(glGetUniformLocation(shaderProgram.id, "cameraPos"), camera.position.x, camera.position.y, camera.position.z);
 
 		auto modelIDs = registry.ViewIDs<ModelComponent>();
-		std::cout << "test" << std::endl;
+
 		for (auto modelID : modelIDs)
 		{
 			auto modelPtr = registry.GetComponent<ModelComponent>(modelID);
@@ -125,11 +125,7 @@ int main(void)
 			model.rotation.y += 0.001f;
 
 			camera.position = model.position;
-
-			std::cout << "(" << model.position.x << ", " << model.position.y << ", " << model.position.z << ")" << std::endl;
-			std::cout << "(" << model.rotation.x << ", " << model.rotation.y << ", " << model.rotation.z << ")" << std::endl;
 		}
-		std::cout << "(" << camera.position.x << ", " << camera.position.y << ", " << camera.position.z << ")" << std::endl;
 
 		glfwSwapBuffers(window);
 

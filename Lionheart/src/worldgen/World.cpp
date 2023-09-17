@@ -321,9 +321,9 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 {
 	Random::Seed("test");
 
-	Fractal altitudeFractal(powf(2, 12), 1.0f, 1.55f);
-	Fractal precipitationFractal(powf(2, 12), 1.0f, 1.8f);
-	Fractal soilFractal(powf(2, 12), 1.0f, 1.8f);
+	Fractal altitudeFractal(powf(2, 10), 1.0f, 1.55f);
+	Fractal precipitationFractal(powf(2, 10), 1.0f, 1.8f);
+	Fractal soilFractal(powf(2, 10), 1.0f, 1.8f);
 
 	float seaLevel = 0.5f;
 
