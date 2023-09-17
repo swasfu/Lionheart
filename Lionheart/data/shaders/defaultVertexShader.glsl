@@ -2,9 +2,9 @@
 
 layout (location = 0) in vec3 dPosition;
 layout (location = 1) in vec3 dNormal;
-layout (location = 2) in vec3 dColour;
+layout (location = 2) in vec4 dColour;
 
-out vec3 vColour;
+out vec4 vColour;
 out vec3 vNormal;
 out vec3 vPosition;
 

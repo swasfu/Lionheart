@@ -455,7 +455,7 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 			GLVertex newVertex;
 			newVertex.position = vertex;
 			newVertex.normal = tileNormal;
-			newVertex.colour = faceColour;
+			newVertex.colour = glm::vec4(faceColour, 1.0f);
 			newVertex.texUV = glm::vec2(0.0f);
 
 			worldModel->model.mesh.vertices.push_back(newVertex);
@@ -600,12 +600,15 @@ void World::GenerateClouds(Registry* registry, float size, int subdivisions)
 		float longitude = NormalToLongitude(tileNormal);
 
 		int oldVertexCount = cloudsModel->model.mesh.vertices.size();
+		float cloudEffect = precipitation.Value(latitude, longitude);
+		cloudEffect -= precipitation.average;
+		cloudEffect /= precipitation.stdev;
 		for (auto& vertex : centreVertices)
 		{
 			GLVertex newVertex;
 			newVertex.position = vertex;
 			newVertex.normal = tileNormal;
-			newVertex.colour = glm::vec3(1.0f - precipitation.Value(latitude, longitude));
+			newVertex.colour = glm::vec4(glm::vec3(1.0f - cloudEffect / 3.0f), cloudEffect);
 			newVertex.texUV = glm::vec2(0.0f);
 
 			cloudsModel->model.mesh.vertices.push_back(newVertex);
@@ -631,7 +634,7 @@ void World::UpdateTemperature(glm::vec3 sunDirection)
 
 }
 
-void World::UpdatePrecipitation()
+void World::UpdatePrecipitation(Registry* registry, EntityID cloudsID)
 {
 	ValueMap precipitationCopy = precipitation;
 	for (int i = 0; i < precipitation.size - 1; i++)
@@ -721,4 +724,19 @@ void World::UpdatePrecipitation()
 	precipitation.Free();
 	precipitation.values = precipitationCopy.values;
 	precipitationCopy.values = nullptr;
+
+	auto clouds = registry->GetComponent<ModelComponent>(cloudsID);
+	for (auto& cloudVertex : clouds->model.mesh.vertices)
+	{
+		float latitude = NormalToLatitude(cloudVertex.normal);
+		float longitude = NormalToLongitude(cloudVertex.normal);
+
+		float cloudEffect = precipitation.Value(latitude, longitude);
+		cloudEffect -= precipitation.average;
+		cloudEffect /= precipitation.stdev;
+
+		cloudVertex.colour = glm::vec4(glm::vec3(1.0f - cloudEffect / 3.0f), cloudEffect);
+	}
+
+	clouds->model.mesh.Setup();
 }

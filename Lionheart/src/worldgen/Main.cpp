@@ -108,6 +108,8 @@ int main(void)
 
 		auto modelIDs = registry.ViewIDs<ModelComponent>();
 
+		bool bullshit = true;
+
 		for (auto modelID : modelIDs)
 		{
 			auto modelPtr = registry.GetComponent<ModelComponent>(modelID);
@@ -115,12 +117,25 @@ int main(void)
 
 			model.mesh.vao.Bind();
 
+			if (bullshit) model.rotation.y += 0.001f;
+			else
+			{
+				model.rotation.y += 0.0012f;
+				world.UpdatePrecipitation(&registry, modelID);
+			}
+
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "translation"), 1, GL_FALSE, glm::value_ptr(model.TranslationMatrix()));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "rotation"), 1, GL_FALSE, glm::value_ptr(model.RotationMatrix()));
+			if (bullshit)
+			{
+				glUniform1f(glGetUniformLocation(shaderProgram.id, "alpha"), 1.0f);
+				bullshit = false;
+			} else
+			{
+				glUniform1f(glGetUniformLocation(shaderProgram.id, "alpha"), 0.5f);
+			}
 
 			glDrawElements(GL_TRIANGLES, model.mesh.indices.size(), GL_UNSIGNED_INT, 0);
-
-			model.rotation.y += 0.001f;
 
 			camera.position = model.position;
 		}

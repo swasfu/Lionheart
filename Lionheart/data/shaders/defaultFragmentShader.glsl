@@ -2,13 +2,14 @@
 
 out vec4 finalColour;
 
-in vec3 vColour;
+in vec4 vColour;
 in vec3 vNormal;
 in vec3 vPosition;
 
 uniform vec4 lightColour;
 uniform vec3 lightPos;
 uniform vec3 cameraPos;
+uniform float alpha;
 
 void main()
 {
@@ -27,6 +28,7 @@ void main()
     float specular = pow(max(dot(look, reflection), 0.0f), 8) * 0.2f;
 
 
-    vec4 tempColour = vec4(vColour, 1.0f) * lightColour * (ambient + diffuse + specular);
+    vec4 tempColour = vColour * lightColour * (ambient + diffuse + specular);
+    tempColour.w = vColour.w;
     finalColour = tempColour;
 }
