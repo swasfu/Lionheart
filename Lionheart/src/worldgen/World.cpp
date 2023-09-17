@@ -324,70 +324,8 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	Fractal altitudeFractal(powf(2, 12), 1.0f, 1.55f);
 	Fractal precipitationFractal(powf(2, 12), 1.0f, 1.8f);
 	Fractal soilFractal(powf(2, 12), 1.0f, 1.8f);
-	/*
-	int totalWidth = pow(2, 12);
-	int width = totalWidth / 2;
-	float factor = 1.0f;
-	float factorDecay = 1.5f;
-	float* heightMap = (float*)malloc(totalWidth * totalWidth * sizeof(float));
-	heightMap[0] = Random::RandomFloat(0.0f, 1.0f);
-	while (width > 0)
-	{
-		for (int i = 0; i < (totalWidth / width) + 1; i++)
-		{
-			for (int j = 0; j < (totalWidth / width) + 1; j++)
-			{
-				if (i & 1 && j & 1)
-				{
-					int x = QuickOverflow(i * width, totalWidth);
-					int y = QuickOverflow(j * width, totalWidth);
 
-					int left = QuickOverflow((i - 1) * width, totalWidth);
-					int right = QuickOverflow((i + 1) * width, totalWidth);
-					int top = QuickOverflow((j - 1) * width, totalWidth);
-					int bottom = QuickOverflow((j + 1) * width, totalWidth);
-
-					heightMap[totalWidth * x + y] = ((heightMap[totalWidth * left + top] +
-						heightMap[totalWidth * right + top] +
-						heightMap[totalWidth * left + bottom] +
-						heightMap[totalWidth * right + bottom]) * (float)factor / 4.0f +
-						Random::RandomFloat(0.0f, 1.0f)) / (factor + 1);
-				} else if (i & 1)
-				{
-					int x = QuickOverflow(i * width, totalWidth);
-					int y = QuickOverflow(j * width, totalWidth);
-
-					int left = QuickOverflow((i - 1) * width, totalWidth);
-					int right = QuickOverflow((i + 1) * width, totalWidth);
-
-					heightMap[totalWidth * x + y] = ((heightMap[totalWidth * left + y] +
-						heightMap[totalWidth * right + y]) * (float)factor / 2.0f +
-						Random::RandomFloat(0.0f, 1.0f)) / (factor + 1);
-				} else if (j & 1)
-				{
-					int x = QuickOverflow(i * width, totalWidth);
-					int y = QuickOverflow(j * width, totalWidth);
-
-					int top = QuickOverflow((j - 1) * width, totalWidth);
-					int bottom = QuickOverflow((j + 1) * width, totalWidth);
-
-					heightMap[totalWidth * x + y] = ((heightMap[totalWidth * x + top] +
-						heightMap[totalWidth * x + bottom]) * (float)factor / 2.0f +
-						Random::RandomFloat(0.0f, 1.0f)) / (factor + 1);
-				}
-			}
-		}
-		width /= 2;
-		factor *= factorDecay;
-	}
-	*/
-
-	float averageAltitude = altitudeFractal.Average();
-	float stdevAltitude = altitudeFractal.Stdev(averageAltitude);
-
-	std::cout << "Average altitude: " << averageAltitude << ", stdev: " << stdevAltitude << std::endl;
-
-	float seaLevel = averageAltitude + 0.0f * stdevAltitude;
+	float seaLevel = 0.5f;
 
 	Polyhedron icosahedron = Icosahedron(size);
 	Polyhedron geodesic;
@@ -400,7 +338,6 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	std::vector<PolyVertex*> edgeVertices;
 	int edgeCount = 0;
 	int innerCount = 0;
-	//std::unordered_map<PolyVertex*, float> vertexAltitudes;
 	for (auto& face : icosahedron.faces)
 	{
 		glm::vec3 a = face->vertices[0]->coords;
@@ -473,10 +410,6 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	std::map<TileComponent*, std::vector<int>> tileToVertexIndices;
 	std::map<TileComponent*, std::vector<PolyVertex*>> tileToNeighbourVertices;
 	std::map<PolyVertex*, TileComponent*> vertexToTile;
-	float lowestLatitude = 1.0f;
-	float highestLatitude = 0.0f;
-	float lowestLongitude = 1.0f;
-	float highestLongitude = 0.0f;
 	for (auto& vertex : geodesic.vertices)
 	{
 		EntityID tileEntityID = registry->RegisterEntity();
@@ -513,20 +446,12 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 		float precipitation = precipitationFractal.Value(latitude, longitude);
 		float soil = soilFractal.Value(latitude, longitude);
 
-		float altitudeDeviation = (altitude - seaLevel) / stdevAltitude;
+		float altitudeDeviation = (altitude - seaLevel) / altitudeFractal.stdev;
 
 		altitude -= altitudeFractal.average;
 		altitude /= altitudeFractal.stdev;
 
 		glm::vec3 faceColour = DetermineBiome(altitudeFractal, precipitationFractal, soilFractal, latitude, longitude, 0.5f) / 256.0f + glm::vec3(altitude * 0.04f);
-
-		//std::cout << surfaceTemperature << std::endl;
-
-		if (latitude > highestLatitude) highestLatitude = latitude;
-		if (latitude < lowestLatitude) lowestLatitude = latitude;
-
-		if (longitude > highestLongitude) highestLongitude = longitude;
-		if (longitude < lowestLongitude) lowestLongitude = longitude;
 
 		tile->normal = tileNormal;
 
@@ -555,10 +480,6 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	}
 	end = std::chrono::steady_clock::now();
 	std::cout << "done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
-	std::cout << lowestLatitude << std::endl;
-	std::cout << highestLatitude << std::endl;
-	std::cout << lowestLongitude << std::endl;
-	std::cout << highestLongitude << std::endl;
 
 	std::cout << "Resolving tile neighbours...";
 	begin = std::chrono::steady_clock::now();
