@@ -196,6 +196,7 @@
     <ClInclude Include="lib\thirdparty\pugixml\pugiconfig.hpp" />
     <ClInclude Include="lib\thirdparty\pugixml\pugixml.hpp" />
     <ClInclude Include="lib\thirdparty\stb\stb_image.h" />
+    <ClInclude Include="lib\worldgen\Fractal.h" />
     <ClInclude Include="lib\worldgen\ValueMap.h" />
     <ClInclude Include="lib\worldgen\World.h" />
     <ClInclude Include="lib\worldgen\components\ModelComponent.h" />
@@ -203,6 +204,7 @@
     <ClInclude Include="lib\worldgen\components\WorldComponent.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\worldgen\Fractal.cpp" />
     <ClCompile Include="src\lionheart\ecs\Registry.cpp" />
     <ClCompile Include="src\lionheart\graphics\GLCamera.cpp" />
     <ClCompile Include="src\lionheart\graphics\GLEBO.cpp" />

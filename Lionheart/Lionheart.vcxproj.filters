@@ -24,6 +24,7 @@
     <ClCompile Include="src\math\Random.cpp" />
     <ClCompile Include="src\lionheart\ecs\Registry.cpp" />
     <ClCompile Include="src\worldgen\World.cpp" />
+    <ClCompile Include="src\worldgen\Fractal.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\1240\components\creatures\BodyPartComponent.h" />
@@ -84,6 +85,7 @@
     <ClInclude Include="lib\worldgen\components\TileComponent.h" />
     <ClInclude Include="lib\worldgen\components\WorldComponent.h" />
     <ClInclude Include="lib\lionheart\graphics\GLComputeShader.h" />
+    <ClInclude Include="lib\worldgen\Fractal.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="lib\1240\components\creatures\BodyPartAttachedComponent.h" />

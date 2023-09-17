@@ -7,7 +7,6 @@ int QuickOverflow(int value, int max);
 struct ValueMap
 {
 	ValueMap();
-	ValueMap(int size, float factor, float factorDecay);
 	~ValueMap();
 
 	float Average();
@@ -22,5 +21,4 @@ struct ValueMap
 };
 
 float NormalToLatitude(glm::vec3 normal);
-
 float NormalToLongitude(glm::vec3 normal);

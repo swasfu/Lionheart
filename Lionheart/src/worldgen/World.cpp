@@ -1,5 +1,6 @@
 #include "worldgen/World.h"
 
+#include "worldgen/Fractal.h"
 #include "worldgen/components/TileComponent.h"
 #include "worldgen/components/ModelComponent.h"
 
@@ -323,9 +324,9 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 {
 	Random::Seed("test");
 
-	ValueMap altitudeFractal(powf(2, 10), 1.0f, 1.55f);
-	ValueMap precipitationFractal(powf(2, 10), 1.0f, 1.8f);
-	ValueMap soilFractal(powf(2, 10), 1.0f, 1.8f);
+	CreateFractal(altitudeFractal, powf(2, 10), 1.0f, 1.55f);
+	CreateFractal(precipitationFractal, powf(2, 10), 1.0f, 1.8f);
+	CreateFractal(soilFractal, powf(2, 10), 1.0f, 1.8f);
 
 	float seaLevel = 0.5f;
 
@@ -503,4 +504,5 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 
 	std::cout << "Geodesic vertex count: " << geodesic.vertices.size() << std::endl;
 	std::cout << "Geodesic face count: " << geodesic.faces.size() << std::endl;
+	std::cout << "Average face altitude: " << altitudeFractal.average << std::endl;
 }

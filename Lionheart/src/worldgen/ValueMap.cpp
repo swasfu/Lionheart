@@ -4,6 +4,7 @@
 #include "math/Constants.h"
 
 #include <memory>
+#include <iostream>
 
 int QuickOverflow(int value, int max)
 {
@@ -16,65 +17,8 @@ ValueMap::ValueMap()
 {
 	values = nullptr;
 	size = 0;
-}
-
-ValueMap::ValueMap(int size, float factor, float factorDecay) : size(size)
-{
-	int subdivision = size / 2;
-	values = (float*)malloc(size * size * sizeof(float));
-	values[0] = Random::RandomFloat(0.0f, 1.0f);
-	while (subdivision > 0)
-	{
-		for (int i = 0; i < (size / subdivision) + 1; i++)
-		{
-			for (int j = 0; j < (size / subdivision) + 1; j++)
-			{
-				if (i & 1 && j & 1)
-				{
-					int x = QuickOverflow(i * subdivision, size);
-					int y = QuickOverflow(j * subdivision, size);
-
-					int left = QuickOverflow((i - 1) * subdivision, size);
-					int right = QuickOverflow((i + 1) * subdivision, size);
-					int top = QuickOverflow((j - 1) * subdivision, size);
-					int bottom = QuickOverflow((j + 1) * subdivision, size);
-
-					values[size * x + y] = ((values[size * left + top] +
-						values[size * right + top] +
-						values[size * left + bottom] +
-						values[size * right + bottom]) * (float)factor / 4.0f +
-						Random::RandomFloat(0.0f, 1.0f)) / (factor + 1);
-				} else if (i & 1)
-				{
-					int x = QuickOverflow(i * subdivision, size);
-					int y = QuickOverflow(j * subdivision, size);
-
-					int left = QuickOverflow((i - 1) * subdivision, size);
-					int right = QuickOverflow((i + 1) * subdivision, size);
-
-					values[size * x + y] = ((values[size * left + y] +
-						values[size * right + y]) * (float)factor / 2.0f +
-						Random::RandomFloat(0.0f, 1.0f)) / (factor + 1);
-				} else if (j & 1)
-				{
-					int x = QuickOverflow(i * subdivision, size);
-					int y = QuickOverflow(j * subdivision, size);
-
-					int top = QuickOverflow((j - 1) * subdivision, size);
-					int bottom = QuickOverflow((j + 1) * subdivision, size);
-
-					values[size * x + y] = ((values[size * x + top] +
-						values[size * x + bottom]) * (float)factor / 2.0f +
-						Random::RandomFloat(0.0f, 1.0f)) / (factor + 1);
-				}
-			}
-		}
-		subdivision /= 2;
-		factor *= factorDecay;
-	}
-
-	average = Average();
-	stdev = Stdev(average);
+	average = 0;
+	stdev = 0;
 }
 
 ValueMap::~ValueMap()
@@ -84,7 +28,7 @@ ValueMap::~ValueMap()
 
 float ValueMap::Average()
 {
-	float avg = 0.0f;
+	average = 0.0f;
 
 	for (int i = 0; i < size - 1; i++)
 	{
@@ -93,10 +37,12 @@ float ValueMap::Average()
 		{
 			rowAvg += values[size * i + j];
 		}
-		avg += (rowAvg / (size - 1));
+		average += (rowAvg / (size - 1));
 	}
 
-	return avg / (size - 1);
+	average /= (size - 1);
+
+	return average;
 }
 
 float ValueMap::Stdev()
@@ -106,7 +52,7 @@ float ValueMap::Stdev()
 
 float ValueMap::Stdev(float avg)
 {
-	float stdev = 0.0f;
+	stdev = 0.0f;
 
 	for (int i = 0; i < size - 1; i++)
 	{
