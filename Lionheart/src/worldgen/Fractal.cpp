@@ -5,8 +5,8 @@
 void CreateFractal(ValueMap& map, int size, float factor, float factorDecay)
 {
 	map.size = size;
+	map.Alloc();
 	int subdivision = size / 2;
-	map.values = (float*)malloc(size * size * sizeof(float));
 	map.values[0] = Random::RandomFloat(0.0f, 1.0f);
 	while (subdivision > 0)
 	{

@@ -19,11 +19,12 @@ ValueMap::ValueMap()
 	size = 0;
 	average = 0;
 	stdev = 0;
+	alloc = 0;
 }
 
 ValueMap::~ValueMap()
 {
-	if (values) free(values);
+	Free();
 }
 
 float ValueMap::Average()
@@ -50,6 +51,19 @@ float ValueMap::Stdev()
 	return Stdev(Average());
 }
 
+size_t ValueMap::Alloc()
+{
+	alloc = (size_t)size * (size_t)size * sizeof(float);
+	values = (float*)malloc(alloc);
+	return alloc;
+}
+
+void ValueMap::Free()
+{
+	if (values) free(values);
+	alloc = 0;
+}
+
 float ValueMap::Stdev(float avg)
 {
 	stdev = 0.0f;
@@ -71,6 +85,15 @@ float ValueMap::Stdev(float avg)
 float ValueMap::Value(float latitude, float longitude)
 {
 	return values[size * (int)(latitude * (float)size) + (int)(longitude * (float)size)];
+}
+
+void ValueMap::operator=(ValueMap& other)
+{
+	size = other.size;
+	Alloc();
+	memcpy(values, other.values, alloc);
+	average = other.average;
+	stdev = other.stdev;
 }
 
 float NormalToLatitude(glm::vec3 normal)

@@ -9,8 +9,11 @@ class World
 public:
 	World();
 	void GenerateTiles(Registry* registry, float size, int subdivisions);
+	void GenerateClouds(Registry* registry, float size, int subdivisions);
+	void UpdateTemperature(glm::vec3 sunDirection);
+	void UpdatePrecipitation();
 private:
 	ValueMap altitudeFractal;
-	ValueMap precipitationFractal;
+	ValueMap precipitation;
 	ValueMap soilFractal;
 };

@@ -325,7 +325,7 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	Random::Seed("test");
 
 	CreateFractal(altitudeFractal, powf(2, 10), 1.0f, 1.55f);
-	CreateFractal(precipitationFractal, powf(2, 10), 1.0f, 1.8f);
+	CreateFractal(precipitation, powf(2, 8), 1.0f, 1.8f);
 	CreateFractal(soilFractal, powf(2, 10), 1.0f, 1.8f);
 
 	float seaLevel = 0.5f;
@@ -445,16 +445,7 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 		float latitude = NormalToLatitude(tileNormal);
 		float longitude = NormalToLongitude(tileNormal);
 
-		float altitude = altitudeFractal.Value(latitude, longitude);
-		float precipitation = precipitationFractal.Value(latitude, longitude);
-		float soil = soilFractal.Value(latitude, longitude);
-
-		float altitudeDeviation = (altitude - seaLevel) / altitudeFractal.stdev;
-
-		altitude -= altitudeFractal.average;
-		altitude /= altitudeFractal.stdev;
-
-		glm::vec3 faceColour = DetermineBiome(altitudeFractal, precipitationFractal, soilFractal, latitude, longitude, 0.5f) / 256.0f + glm::vec3(altitude * 0.04f);
+		glm::vec3 faceColour = DetermineBiome(altitudeFractal, precipitation, soilFractal, latitude, longitude, 0.5f) / 256.0f;
 
 		tile->normal = tileNormal;
 
@@ -505,4 +496,247 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	std::cout << "Geodesic vertex count: " << geodesic.vertices.size() << std::endl;
 	std::cout << "Geodesic face count: " << geodesic.faces.size() << std::endl;
 	std::cout << "Average face altitude: " << altitudeFractal.average << std::endl;
+}
+
+void World::GenerateClouds(Registry* registry, float size, int subdivisions)
+{
+	Polyhedron icosahedron = Icosahedron(size);
+	Polyhedron geodesic;
+
+	std::chrono::steady_clock::time_point begin;
+	std::chrono::steady_clock::time_point end;
+
+	std::cout << "Subdividing icosahedron into geodesic...";
+	begin = std::chrono::steady_clock::now();
+	std::vector<PolyVertex*> edgeVertices;
+	int edgeCount = 0;
+	int innerCount = 0;
+	for (auto& face : icosahedron.faces)
+	{
+		glm::vec3 a = face->vertices[0]->coords;
+		glm::vec3 b = face->vertices[1]->coords;
+		glm::vec3 c = face->vertices[2]->coords;
+
+		glm::vec3 ab = (b - a) / (float)subdivisions;
+		glm::vec3 ac = (c - a) / (float)subdivisions;
+		glm::vec3 bc = (c - b) / (float)subdivisions;
+
+		std::vector<PolyVertex*> vertices;
+		vertices.reserve(((2 + subdivisions) * (1 + subdivisions)) / 2);
+		for (int i = 0; i < subdivisions + 1; i++)
+		{
+			PolyVertex nextA = PolyVertex(a);
+			vertices.push_back(AddVertexIfNotExists(geodesic, nextA, edgeVertices));
+			c = a;
+			for (int j = 1; j < subdivisions + 1 - i; j++)
+			{
+				c += ac;
+				PolyVertex nextC = PolyVertex(c);
+				if (i == 0 || j == (subdivisions - i))
+				{
+					PolyVertex nextC = PolyVertex(c);
+					vertices.push_back(AddVertexIfNotExists(geodesic, nextC, edgeVertices));
+				} else
+				{
+					vertices.push_back(geodesic.AddVertex(nextC));
+				}
+			}
+			a += ab;
+		}
+
+		int count = 0;
+		for (int i = subdivisions; i > 0; i--)
+		{
+			for (int j = 0; j < i; j++)
+			{
+				std::vector<PolyVertex*> forwardVertices = { vertices[count], vertices[count + 1], vertices[count + i + 1] };
+				Polygon forwardTriangle = Polygon(forwardVertices);
+				geodesic.AddFace(forwardTriangle);
+				if (j != 0)
+				{
+					std::vector<PolyVertex*> backwardVertices = { vertices[count], vertices[count + i], vertices[count + i + 1] };
+					Polygon backwardTriangle = Polygon(backwardVertices);
+					geodesic.AddFace(backwardTriangle);
+				}
+				count++;
+			}
+			count++;
+		}
+	}
+	end = std::chrono::steady_clock::now();
+	std::cout << " done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
+
+	std::cout << "Projecting geodesic onto sphere...";
+	begin = std::chrono::steady_clock::now();
+	for (auto& vertex : geodesic.vertices)
+	{
+		vertex->coords = glm::normalize(vertex->coords) * size;
+	}
+	end = std::chrono::steady_clock::now();
+	std::cout << " done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
+
+	std::cout << "Generating GL data...";
+	begin = std::chrono::steady_clock::now();
+	EntityID worldID = registry->RegisterEntity();
+	ModelComponent* worldModel = registry->AddComponent<ModelComponent>(worldID);
+	float altitudeRange = 1.0f;
+	std::map<TileComponent*, std::vector<int>> tileToVertexIndices;
+	std::map<TileComponent*, std::vector<PolyVertex*>> tileToNeighbourVertices;
+	std::map<PolyVertex*, TileComponent*> vertexToTile;
+	for (auto& vertex : geodesic.vertices)
+	{
+		EntityID tileEntityID = registry->RegisterEntity();
+
+		TileComponent* tile = registry->AddComponent<TileComponent>(tileEntityID);
+		vertexToTile[vertex.get()] = tile;
+		tile->altitude = 0.0f;
+		tile->worldID = worldID;
+
+		std::vector<glm::vec3> centreVertices;
+
+		auto& neighbourVertices = tileToNeighbourVertices[tile];
+
+		for (auto& memberPolygon : vertex->memberPolygons)
+		{
+			centreVertices.push_back(memberPolygon->Centroid());
+			for (auto& neighbourVertex : memberPolygon->vertices)
+			{
+				if (std::find(neighbourVertices.begin(), neighbourVertices.end(), neighbourVertex) == neighbourVertices.end())
+				{
+					neighbourVertices.push_back(neighbourVertex);
+				}
+			}
+		}
+		WindOutward(centreVertices, true);
+
+		std::vector<GLVertex> vertices;
+		glm::vec3 tileNormal = glm::normalize(Centroid(centreVertices));
+		//std::cout << "(" << latitude << ", " << longitude << ")" << std::endl;
+		float latitude = NormalToLatitude(tileNormal);
+		float longitude = NormalToLongitude(tileNormal);
+
+		tile->normal = tileNormal;
+
+		int oldVertexCount = worldModel->model.mesh.vertices.size();
+		for (auto& vertex : centreVertices)
+		{
+			GLVertex newVertex;
+			newVertex.position = vertex;
+			newVertex.normal = tileNormal;
+			newVertex.colour = glm::vec3(0.2f);
+			newVertex.texUV = glm::vec2(0.0f);
+
+			worldModel->model.mesh.vertices.push_back(newVertex);
+			tileToVertexIndices[tile].push_back(worldModel->model.mesh.vertices.size() - 1);
+		}
+
+		std::vector<GLuint> indices = std::vector<GLuint>();
+		for (int i = 1; i < centreVertices.size() - 1; i++)
+		{
+			worldModel->model.mesh.indices.push_back(oldVertexCount);
+			worldModel->model.mesh.indices.push_back(oldVertexCount + i);
+			worldModel->model.mesh.indices.push_back(oldVertexCount + i + 1);
+		}
+
+		GLTexture tileTexture;
+	}
+	end = std::chrono::steady_clock::now();
+	std::cout << "done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
+}
+
+void World::UpdateTemperature(glm::vec3 sunDirection)
+{
+
+}
+
+void World::UpdatePrecipitation()
+{
+	ValueMap precipitationCopy = precipitation;
+	for (int i = 0; i < precipitation.size - 1; i++)
+	{
+		for (int j = 0; j < precipitation.size - 1; j++)
+		{
+			int left = QuickOverflow(i - 1, precipitation.size);
+			int right = QuickOverflow(i + 1, precipitation.size);
+			int top = QuickOverflow(j - 1, precipitation.size);
+			int bottom = QuickOverflow(j + 1, precipitation.size);
+
+			int index = i * precipitation.size + j;
+			int leftIndex = left * precipitation.size + j;
+			int rightIndex = right * precipitation.size + j;
+			int topIndex = i * precipitation.size + top;
+			int bottomIndex = i * precipitation.size + bottom;
+
+			float value = precipitation.values[index];
+			float leftValue = precipitation.values[leftIndex];
+			float rightValue = precipitation.values[rightIndex];
+			float topValue = precipitation.values[topIndex];
+			float bottomValue = precipitation.values[bottomIndex];
+
+			int lowerCount = 0;
+			float averageValue = 0.0f;
+			bool useLeft = value > leftValue;
+			if (useLeft)
+			{
+				lowerCount++;
+				averageValue += leftValue;
+			}
+			bool useRight = value > rightValue;
+			if (useRight)
+			{
+				lowerCount++;
+				averageValue += rightValue;
+			}
+			bool useTop = value > topValue;
+			if (useTop)
+			{
+				lowerCount++;
+				averageValue += topValue;
+			}
+			bool useBottom = value > bottomValue;
+			if (useBottom)
+			{
+				lowerCount++;
+				averageValue += bottomValue;
+			}
+
+			averageValue /= (float)lowerCount;
+
+			lowerCount = 0;
+			float averagePool = value - averageValue;
+			if (useLeft && leftValue >= averageValue)
+			{
+				averagePool += leftValue - averageValue;
+				useLeft = false;
+			} else if (useLeft) lowerCount++;
+			if (useRight && rightValue >= averageValue)
+			{
+				averagePool += rightValue - averageValue;
+				useRight = false;
+			} else if (useRight) lowerCount++;
+			if (useTop && topValue >= averageValue)
+			{
+				averagePool += topValue - averageValue;
+				useTop = false;
+			} else if (useTop) lowerCount++;
+			if (useBottom && bottomValue >= averageValue)
+			{
+				averagePool += bottomValue - averageValue;
+				useBottom = false;
+			} else if (useRight) lowerCount++;
+
+			precipitationCopy.values[index] -= averagePool;
+
+			averagePool /= (float)lowerCount;
+
+			if (useLeft) precipitationCopy.values[leftIndex] += averagePool;
+			if (useRight) precipitationCopy.values[rightIndex] += averagePool;
+			if (useTop) precipitationCopy.values[topIndex] += averagePool;
+			if (useBottom) precipitationCopy.values[bottomIndex] += averagePool;
+		}
+	}
+
+	precipitation.Free();
+	precipitation.values = precipitationCopy.values;
+	precipitationCopy.values = nullptr;
 }
