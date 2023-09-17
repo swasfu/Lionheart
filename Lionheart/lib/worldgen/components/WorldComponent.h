@@ -1,9 +1,10 @@
 #pragma once
 
-#include "lionheart/ecs/registry/ComponentBase.h"
-#include "lionheart/parsing/XMLParser.h"
+#include "lionheart/ecs/ComponentBase.h"
+
+#include <string>
 
 struct WorldComponent : public ComponentBase
 {
-	std::vector<EntityID> neighbours;
+	std::string name;
 };

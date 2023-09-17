@@ -2,6 +2,7 @@
 
 #include "worldgen/Fractal.h"
 #include "worldgen/components/TileComponent.h"
+#include "worldgen/components/CloudComponent.h"
 #include "worldgen/components/ModelComponent.h"
 
 #include "math/polygons/Polyhedron.h"
@@ -409,7 +410,6 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	begin = std::chrono::steady_clock::now();
 	EntityID worldID = registry->RegisterEntity();
 	ModelComponent* worldModel = registry->AddComponent<ModelComponent>(worldID);
-	float altitudeRange = 1.0f;
 	std::map<TileComponent*, std::vector<int>> tileToVertexIndices;
 	std::map<TileComponent*, std::vector<PolyVertex*>> tileToNeighbourVertices;
 	std::map<PolyVertex*, TileComponent*> vertexToTile;
@@ -419,7 +419,6 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 
 		TileComponent* tile = registry->AddComponent<TileComponent>(tileEntityID);
 		vertexToTile[vertex.get()] = tile;
-		tile->altitude = 0.0f;
 		tile->worldID = worldID;
 
 		std::vector<glm::vec3> centreVertices;
@@ -445,9 +444,10 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 		float latitude = NormalToLatitude(tileNormal);
 		float longitude = NormalToLongitude(tileNormal);
 
-		glm::vec3 faceColour = DetermineBiome(altitudeFractal, precipitation, soilFractal, latitude, longitude, 0.5f) / 256.0f;
+		tile->latitude = latitude;
+		tile->longitude = longitude;
 
-		tile->normal = tileNormal;
+		glm::vec3 faceColour = DetermineBiome(altitudeFractal, precipitation, soilFractal, latitude, longitude, 0.5f) / 256.0f;
 
 		int oldVertexCount = worldModel->model.mesh.vertices.size();
 		for (auto& vertex : centreVertices)
@@ -469,8 +469,6 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 			worldModel->model.mesh.indices.push_back(oldVertexCount + i);
 			worldModel->model.mesh.indices.push_back(oldVertexCount + i + 1);
 		}
-
-		GLTexture tileTexture;
 	}
 	end = std::chrono::steady_clock::now();
 	std::cout << "done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
@@ -496,6 +494,8 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	std::cout << "Geodesic vertex count: " << geodesic.vertices.size() << std::endl;
 	std::cout << "Geodesic face count: " << geodesic.faces.size() << std::endl;
 	std::cout << "Average face altitude: " << altitudeFractal.average << std::endl;
+
+	GenerateClouds(registry, size * 1.02f, subdivisions);
 }
 
 void World::GenerateClouds(Registry* registry, float size, int subdivisions)
@@ -577,35 +577,19 @@ void World::GenerateClouds(Registry* registry, float size, int subdivisions)
 
 	std::cout << "Generating GL data...";
 	begin = std::chrono::steady_clock::now();
-	EntityID worldID = registry->RegisterEntity();
-	ModelComponent* worldModel = registry->AddComponent<ModelComponent>(worldID);
-	float altitudeRange = 1.0f;
-	std::map<TileComponent*, std::vector<int>> tileToVertexIndices;
-	std::map<TileComponent*, std::vector<PolyVertex*>> tileToNeighbourVertices;
-	std::map<PolyVertex*, TileComponent*> vertexToTile;
+	EntityID cloudsID = registry->RegisterEntity();
+	ModelComponent* cloudsModel = registry->AddComponent<ModelComponent>(cloudsID);
 	for (auto& vertex : geodesic.vertices)
 	{
-		EntityID tileEntityID = registry->RegisterEntity();
+		EntityID cloudEntityID = registry->RegisterEntity();
 
-		TileComponent* tile = registry->AddComponent<TileComponent>(tileEntityID);
-		vertexToTile[vertex.get()] = tile;
-		tile->altitude = 0.0f;
-		tile->worldID = worldID;
+		CloudComponent* cloud = registry->AddComponent<CloudComponent>(cloudEntityID);
 
 		std::vector<glm::vec3> centreVertices;
-
-		auto& neighbourVertices = tileToNeighbourVertices[tile];
 
 		for (auto& memberPolygon : vertex->memberPolygons)
 		{
 			centreVertices.push_back(memberPolygon->Centroid());
-			for (auto& neighbourVertex : memberPolygon->vertices)
-			{
-				if (std::find(neighbourVertices.begin(), neighbourVertices.end(), neighbourVertex) == neighbourVertices.end())
-				{
-					neighbourVertices.push_back(neighbourVertex);
-				}
-			}
 		}
 		WindOutward(centreVertices, true);
 
@@ -615,33 +599,31 @@ void World::GenerateClouds(Registry* registry, float size, int subdivisions)
 		float latitude = NormalToLatitude(tileNormal);
 		float longitude = NormalToLongitude(tileNormal);
 
-		tile->normal = tileNormal;
-
-		int oldVertexCount = worldModel->model.mesh.vertices.size();
+		int oldVertexCount = cloudsModel->model.mesh.vertices.size();
 		for (auto& vertex : centreVertices)
 		{
 			GLVertex newVertex;
 			newVertex.position = vertex;
 			newVertex.normal = tileNormal;
-			newVertex.colour = glm::vec3(0.2f);
+			newVertex.colour = glm::vec3(1.0f - precipitation.Value(latitude, longitude));
 			newVertex.texUV = glm::vec2(0.0f);
 
-			worldModel->model.mesh.vertices.push_back(newVertex);
-			tileToVertexIndices[tile].push_back(worldModel->model.mesh.vertices.size() - 1);
+			cloudsModel->model.mesh.vertices.push_back(newVertex);
 		}
 
 		std::vector<GLuint> indices = std::vector<GLuint>();
 		for (int i = 1; i < centreVertices.size() - 1; i++)
 		{
-			worldModel->model.mesh.indices.push_back(oldVertexCount);
-			worldModel->model.mesh.indices.push_back(oldVertexCount + i);
-			worldModel->model.mesh.indices.push_back(oldVertexCount + i + 1);
+			cloudsModel->model.mesh.indices.push_back(oldVertexCount);
+			cloudsModel->model.mesh.indices.push_back(oldVertexCount + i);
+			cloudsModel->model.mesh.indices.push_back(oldVertexCount + i + 1);
 		}
-
-		GLTexture tileTexture;
 	}
 	end = std::chrono::steady_clock::now();
 	std::cout << "done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
+
+	cloudsModel->model.mesh.Setup();
+	cloudsModel->model.position.z = -20.0f;
 }
 
 void World::UpdateTemperature(glm::vec3 sunDirection)

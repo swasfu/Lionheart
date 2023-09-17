@@ -86,6 +86,7 @@
     <ClInclude Include="lib\worldgen\components\WorldComponent.h" />
     <ClInclude Include="lib\lionheart\graphics\GLComputeShader.h" />
     <ClInclude Include="lib\worldgen\Fractal.h" />
+    <ClInclude Include="lib\worldgen\components\CloudComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="lib\1240\components\creatures\BodyPartAttachedComponent.h" />

@@ -196,6 +196,7 @@
     <ClInclude Include="lib\thirdparty\pugixml\pugiconfig.hpp" />
     <ClInclude Include="lib\thirdparty\pugixml\pugixml.hpp" />
     <ClInclude Include="lib\thirdparty\stb\stb_image.h" />
+    <ClInclude Include="lib\worldgen\components\CloudComponent.h" />
     <ClInclude Include="lib\worldgen\Fractal.h" />
     <ClInclude Include="lib\worldgen\ValueMap.h" />
     <ClInclude Include="lib\worldgen\World.h" />

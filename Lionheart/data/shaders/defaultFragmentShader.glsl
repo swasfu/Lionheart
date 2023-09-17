@@ -1,6 +1,6 @@
 #version 330 core
 
-out vec4 final;
+out vec4 finalColour;
 
 in vec3 vColour;
 in vec3 vNormal;
@@ -27,5 +27,6 @@ void main()
     float specular = pow(max(dot(look, reflection), 0.0f), 8) * 0.2f;
 
 
-    final = vec4(vColour, 1.0) * lightColour * (ambient + diffuse + specular);
+    vec4 tempColour = vec4(vColour, 1.0f) * lightColour * (ambient + diffuse + specular);
+    finalColour = tempColour;
 }
