@@ -1,4 +1,4 @@
-#include "worldgen/Fractal.h"
+#include "worldgen/ValueMap.h"
 
 #include "math/Random.h"
 #include "math/Constants.h"
@@ -11,7 +11,14 @@ int QuickOverflow(int value, int max)
 	if (value < 0) return max;
 	else return value;
 }
-Fractal::Fractal(int size, float factor, float factorDecay) : size(size)
+
+ValueMap::ValueMap()
+{
+	values = nullptr;
+	size = 0;
+}
+
+ValueMap::ValueMap(int size, float factor, float factorDecay) : size(size)
 {
 	int subdivision = size / 2;
 	values = (float*)malloc(size * size * sizeof(float));
@@ -70,12 +77,12 @@ Fractal::Fractal(int size, float factor, float factorDecay) : size(size)
 	stdev = Stdev(average);
 }
 
-Fractal::~Fractal()
+ValueMap::~ValueMap()
 {
 	if (values) free(values);
 }
 
-float Fractal::Average()
+float ValueMap::Average()
 {
 	float avg = 0.0f;
 
@@ -92,12 +99,12 @@ float Fractal::Average()
 	return avg / (size - 1);
 }
 
-float Fractal::Stdev()
+float ValueMap::Stdev()
 {
 	return Stdev(Average());
 }
 
-float Fractal::Stdev(float avg)
+float ValueMap::Stdev(float avg)
 {
 	float stdev = 0.0f;
 
@@ -115,7 +122,7 @@ float Fractal::Stdev(float avg)
 	return stdev;
 }
 
-float Fractal::Value(float latitude, float longitude)
+float ValueMap::Value(float latitude, float longitude)
 {
 	return values[size * (int)(latitude * (float)size) + (int)(longitude * (float)size)];
 }

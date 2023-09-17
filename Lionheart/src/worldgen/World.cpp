@@ -1,6 +1,5 @@
 #include "worldgen/World.h"
 
-#include "worldgen/Fractal.h"
 #include "worldgen/components/TileComponent.h"
 #include "worldgen/components/ModelComponent.h"
 
@@ -131,7 +130,7 @@ float GreatCircleDistance(glm::vec3 a, glm::vec3 b, float radius)
 }
 */
 
-glm::vec3 DetermineBiome(Fractal& altitudeFractal, Fractal& precipitationFractal, Fractal& soilFractal, float latitude, float longitude, float seaLevel)
+glm::vec3 DetermineBiome(ValueMap& altitudeFractal, ValueMap& precipitationFractal, ValueMap& soilFractal, float latitude, float longitude, float seaLevel)
 {
 	float altitude = altitudeFractal.Value(latitude, longitude);
 	altitude -= altitudeFractal.average;
@@ -317,13 +316,16 @@ glm::vec3 DetermineBiome(Fractal& altitudeFractal, Fractal& precipitationFractal
 	}
 }
 
+World::World()
+{}
+
 void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 {
 	Random::Seed("test");
 
-	Fractal altitudeFractal(powf(2, 10), 1.0f, 1.55f);
-	Fractal precipitationFractal(powf(2, 10), 1.0f, 1.8f);
-	Fractal soilFractal(powf(2, 10), 1.0f, 1.8f);
+	ValueMap altitudeFractal(powf(2, 10), 1.0f, 1.55f);
+	ValueMap precipitationFractal(powf(2, 10), 1.0f, 1.8f);
+	ValueMap soilFractal(powf(2, 10), 1.0f, 1.8f);
 
 	float seaLevel = 0.5f;
 

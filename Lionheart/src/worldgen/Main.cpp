@@ -65,7 +65,8 @@ int main(void)
 	glUniform4f(glGetUniformLocation(shaderProgram.id, "lightColour"), lightColour.x, lightColour.y, lightColour.z, lightColour.w);
 	glUniform3f(glGetUniformLocation(shaderProgram.id, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
-	World::GenerateTiles(&registry, worldSize, 50);
+	World world;
+	world.GenerateTiles(&registry, worldSize, 50);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -113,9 +114,6 @@ int main(void)
 			auto& model = modelPtr->model;
 
 			model.mesh.vao.Bind();
-
-			glm::mat4 modelMatrix = glm::mat4(1.0f);
-			modelMatrix = glm::translate(model.position);
 
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "translation"), 1, GL_FALSE, glm::value_ptr(model.TranslationMatrix()));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "rotation"), 1, GL_FALSE, glm::value_ptr(model.RotationMatrix()));

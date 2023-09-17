@@ -176,6 +176,7 @@
     <ClInclude Include="lib\ecs\parsing\XMLParser.h" />
     <ClInclude Include="lib\lionheart\ecs\SystemBase.h" />
     <ClInclude Include="lib\lionheart\graphics\GLCamera.h" />
+    <ClInclude Include="lib\lionheart\graphics\GLComputeShader.h" />
     <ClInclude Include="lib\lionheart\graphics\GLEBO.h" />
     <ClInclude Include="lib\lionheart\graphics\GLMesh.h" />
     <ClInclude Include="lib\lionheart\graphics\GLModel.h" />
@@ -195,7 +196,7 @@
     <ClInclude Include="lib\thirdparty\pugixml\pugiconfig.hpp" />
     <ClInclude Include="lib\thirdparty\pugixml\pugixml.hpp" />
     <ClInclude Include="lib\thirdparty\stb\stb_image.h" />
-    <ClInclude Include="lib\worldgen\Fractal.h" />
+    <ClInclude Include="lib\worldgen\ValueMap.h" />
     <ClInclude Include="lib\worldgen\World.h" />
     <ClInclude Include="lib\worldgen\components\ModelComponent.h" />
     <ClInclude Include="lib\worldgen\components\TileComponent.h" />
@@ -220,7 +221,7 @@
     <ClCompile Include="src\math\Random.cpp" />
     <ClCompile Include="lib\thirdparty\pugixml\pugixml.cpp" />
     <ClCompile Include="lib\thirdparty\stb\stb_image.cpp" />
-    <ClCompile Include="src\worldgen\Fractal.cpp" />
+    <ClCompile Include="src\worldgen\ValueMap.cpp" />
     <ClCompile Include="src\lionheart\parsing\XMLParser.cpp" />
     <ClCompile Include="src\worldgen\Main.cpp" />
     <ClCompile Include="src\thirdparty\glad\gl.c" />

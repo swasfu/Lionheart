@@ -4,10 +4,11 @@
 
 int QuickOverflow(int value, int max);
 
-struct Fractal
+struct ValueMap
 {
-	Fractal(int size, float factor, float factorDecay);
-	~Fractal();
+	ValueMap();
+	ValueMap(int size, float factor, float factorDecay);
+	~ValueMap();
 
 	float Average();
 	float Stdev();
