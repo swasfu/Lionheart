@@ -21,6 +21,9 @@ struct ValueMap
 	void Free();
 	float Stdev(float avg);
 	float Value(float latitude, float longitude);
+	float MapCoordsToLatitude(int x);
+	float MapCoordsToLongitude(int y);
+	void MapCoordsToLatitudeLongitude(int x, int y, float& latitude, float& longitude);
 
 	void operator=(ValueMap& other);
 

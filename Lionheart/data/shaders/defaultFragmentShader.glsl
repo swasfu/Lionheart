@@ -14,7 +14,7 @@ uniform float alpha;
 void main()
 {
     // ambient lighting
-    float ambient = 0.1f;
+    float ambient = 0.3f;
 
     vec3 lightDirection = normalize(lightPos - vPosition);
 
@@ -28,7 +28,7 @@ void main()
     float specular = pow(max(dot(look, reflection), 0.0f), 8) * 0.2f;
 
 
-    vec4 tempColour = vColour * lightColour * (ambient + diffuse + specular);
+    vec4 tempColour = vColour * lightColour * (1.0f * ambient + 1.0f * diffuse + 1.0f * specular);
     tempColour.w = vColour.w;
     finalColour = tempColour;
 }

@@ -65,18 +65,18 @@ int main(void)
 	glUniform4f(glGetUniformLocation(shaderProgram.id, "lightColour"), lightColour.x, lightColour.y, lightColour.z, lightColour.w);
 	glUniform3f(glGetUniformLocation(shaderProgram.id, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
-	glm::vec3 test = glm::normalize(glm::vec3(0.0f, 0.0f, 1.4f));
-	std::cout << "(" << test.x << ", " << test.y << ", " << test.z << ")" << std::endl;
-	float latitude = NormalToLatitude(test);
-	float longitude = NormalToLongitude(test);
-	std::cout << latitude << ", " << longitude << std::endl;
-	glm::vec3 result = LatitudeLongitudeToNormal(latitude, longitude);
-	std::cout << "(" << result.x << ", " << result.y << ", " << result.z << ")" << std::endl;
-
 	World world;
-	world.GenerateTiles(&registry, worldSize, 30);
+	world.GenerateTiles(&registry, worldSize, 50);
+	world.UpdateTemperatureModel(&registry);
 
 	int cloudCounter = 0;
+
+	glm::vec3 test = glm::vec3(0.0f, 1.0f, 0.0f);
+	float latitude = NormalToLatitude(test);
+	float longitude = NormalToLongitude(test);
+	glm::vec3 result = LatitudeLongitudeToNormal(latitude, longitude);
+	std::cout << latitude << ", " << longitude << std::endl;
+	std::cout << "(" << result.x << ", " << result.y << ", " << result.z << ")" << std::endl;
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -129,17 +129,18 @@ int main(void)
 
 			if (bullshit)
 			{
-				world.UpdateTemperature(&registry, glm::normalize(glm::vec3(glm::inverse(model.RotationMatrix()) * glm::vec4(-model.position, 1.0f))));
+				cloudCounter++;
+				if (cloudCounter == 60)
+				{
+					world.UpdateTemperature(glm::normalize(glm::vec3(glm::inverse(model.RotationMatrix()) * glm::vec4(-model.position, 1.0f))), 1.0f);
+					world.UpdateTemperatureModel(&registry);
+					cloudCounter = 0;
+				}
+				model.rotation *= glm::angleAxis(glm::radians(360.0f / (60.0f * 24.0f)), glm::vec3(0.0f, 0.0f, 1.0f));// *model.rotation;
 
 				camera.position = model.position;
 			} else
 			{
-				cloudCounter++;
-				if (cloudCounter == 1)
-				{
-					//world.UpdatePrecipitation(&registry, modelID);
-					cloudCounter = 0;
-				}
 			}
 
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "translation"), 1, GL_FALSE, glm::value_ptr(model.TranslationMatrix()));

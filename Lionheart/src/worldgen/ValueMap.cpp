@@ -80,11 +80,33 @@ float ValueMap::Stdev(float avg)
 
 float ValueMap::Value(float latitude, float longitude)
 {
-	latitude += Constants::PI;
-	latitude /= (Constants::PI * 2.0f);
-	longitude += Constants::PI;
-	longitude /= (Constants::PI * 2.0f);
-	return values[size * (int)(latitude * (float)size) + (int)(longitude * (float)size)];
+	latitude += glm::radians(180.0f);
+	latitude /= glm::radians(360.0f);
+	longitude += glm::radians(180.0f);
+	longitude /= glm::radians(360.0f);
+	if (latitude > 1.0f) latitude = 1.0f;
+	if (latitude < 0.0f) latitude = 0.0f;
+	if (longitude > 1.0f) longitude = 1.0f;
+	if (longitude < 0.0f) longitude = 0.0f;
+	return values[size * (int)(latitude * (float)(size - 1)) + (int)(longitude * (float)(size - 2))];
+}
+
+float ValueMap::MapCoordsToLatitude(int x)
+{
+	float latitude = (((float)x - (float)(size - 1) / 2.0f) / (float)(size - 1)) * Constants::PI * 2.0f;
+	return latitude;
+}
+
+float ValueMap::MapCoordsToLongitude(int y)
+{
+	float longitude = (((float)y - (float)(size - 1) / 2.0f) / (float)(size - 2)) * Constants::PI * 2.0f;
+	return longitude;
+}
+
+void ValueMap::MapCoordsToLatitudeLongitude(int x, int y, float& latitude, float& longitude)
+{
+	latitude = (((float)x - (float)(size - 1) / 2.0f) / (float)(size - 1)) * Constants::PI * 2.0f;
+	longitude = (((float)y - (float)(size - 2) / 2.0f) / (float)(size - 2)) * Constants::PI * 2.0f;
 }
 
 void ValueMap::operator=(ValueMap& other)
