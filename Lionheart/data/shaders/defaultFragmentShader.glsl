@@ -14,7 +14,7 @@ uniform float alpha;
 void main()
 {
     // ambient lighting
-    float ambient = 0.3f;
+    float ambient = 0.1f;
 
     vec3 lightDirection = normalize(lightPos - vPosition);
 

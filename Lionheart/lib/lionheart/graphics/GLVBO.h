@@ -9,6 +9,7 @@
 class GLVBO
 {
 public:
+	GLVBO();
 	GLVBO(std::vector<GLVertex>& vertices);
 	void Bind();
 	void Unbind();

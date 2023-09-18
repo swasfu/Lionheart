@@ -7,6 +7,7 @@
 class GLEBO
 {
 public:
+	GLEBO();
 	GLEBO(std::vector<GLuint>& indices);
 	void Bind();
 	void Unbind();

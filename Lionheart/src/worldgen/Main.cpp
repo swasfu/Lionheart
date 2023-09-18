@@ -65,8 +65,18 @@ int main(void)
 	glUniform4f(glGetUniformLocation(shaderProgram.id, "lightColour"), lightColour.x, lightColour.y, lightColour.z, lightColour.w);
 	glUniform3f(glGetUniformLocation(shaderProgram.id, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
+	glm::vec3 test = glm::normalize(glm::vec3(0.0f, 0.0f, 1.4f));
+	std::cout << "(" << test.x << ", " << test.y << ", " << test.z << ")" << std::endl;
+	float latitude = NormalToLatitude(test);
+	float longitude = NormalToLongitude(test);
+	std::cout << latitude << ", " << longitude << std::endl;
+	glm::vec3 result = LatitudeLongitudeToNormal(latitude, longitude);
+	std::cout << "(" << result.x << ", " << result.y << ", " << result.z << ")" << std::endl;
+
 	World world;
-	world.GenerateTiles(&registry, worldSize, 50);
+	world.GenerateTiles(&registry, worldSize, 30);
+
+	int cloudCounter = 0;
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -117,11 +127,19 @@ int main(void)
 
 			model.mesh.vao.Bind();
 
-			if (bullshit) model.rotation.y += 0.001f;
-			else
+			if (bullshit)
 			{
-				model.rotation.y += 0.0012f;
-				world.UpdatePrecipitation(&registry, modelID);
+				world.UpdateTemperature(&registry, glm::normalize(glm::vec3(glm::inverse(model.RotationMatrix()) * glm::vec4(-model.position, 1.0f))));
+
+				camera.position = model.position;
+			} else
+			{
+				cloudCounter++;
+				if (cloudCounter == 1)
+				{
+					//world.UpdatePrecipitation(&registry, modelID);
+					cloudCounter = 0;
+				}
 			}
 
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "translation"), 1, GL_FALSE, glm::value_ptr(model.TranslationMatrix()));
@@ -136,8 +154,6 @@ int main(void)
 			}
 
 			glDrawElements(GL_TRIANGLES, model.mesh.indices.size(), GL_UNSIGNED_INT, 0);
-
-			camera.position = model.position;
 		}
 
 		glfwSwapBuffers(window);

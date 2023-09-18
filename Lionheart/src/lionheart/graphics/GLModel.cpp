@@ -6,13 +6,13 @@
 GLModel::GLModel()
 {
 	position = glm::vec3(0.0f);
-	rotation = glm::vec3(0.0f);
+	rotation = glm::angleAxis(0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 GLModel::GLModel(GLMesh& mesh) : mesh(mesh)
 {
 	position = glm::vec3(0.0f);
-	rotation = glm::vec3(0.0f);
+	rotation = glm::angleAxis(0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 glm::mat4 GLModel::TranslationMatrix()
@@ -22,5 +22,5 @@ glm::mat4 GLModel::TranslationMatrix()
 
 glm::mat4 GLModel::RotationMatrix()
 {
-	return glm::toMat4(glm::quat(rotation));
+	return glm::mat4_cast(rotation);
 }

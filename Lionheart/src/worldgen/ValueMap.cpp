@@ -5,21 +5,20 @@
 
 #include <memory>
 #include <iostream>
+#include <cfloat>
 
 int QuickOverflow(int value, int max)
 {
 	if (value >= max) return 0;
-	if (value < 0) return max;
+	else if (value < 0) return max;
 	else return value;
 }
 
 ValueMap::ValueMap()
 {
-	values = nullptr;
 	size = 0;
 	average = 0;
 	stdev = 0;
-	alloc = 0;
 }
 
 ValueMap::~ValueMap()
@@ -51,17 +50,14 @@ float ValueMap::Stdev()
 	return Stdev(Average());
 }
 
-size_t ValueMap::Alloc()
+void ValueMap::Alloc()
 {
-	alloc = (size_t)size * (size_t)size * sizeof(float);
-	values = (float*)malloc(alloc);
-	return alloc;
+	values.resize(size * size * sizeof(float));
 }
 
 void ValueMap::Free()
 {
-	if (values) free(values);
-	alloc = 0;
+	values.clear();
 }
 
 float ValueMap::Stdev(float avg)
@@ -84,24 +80,38 @@ float ValueMap::Stdev(float avg)
 
 float ValueMap::Value(float latitude, float longitude)
 {
+	latitude += Constants::PI;
+	latitude /= (Constants::PI * 2.0f);
+	longitude += Constants::PI;
+	longitude /= (Constants::PI * 2.0f);
 	return values[size * (int)(latitude * (float)size) + (int)(longitude * (float)size)];
 }
 
 void ValueMap::operator=(ValueMap& other)
 {
+	values = other.values;
 	size = other.size;
-	Alloc();
-	memcpy(values, other.values, alloc);
 	average = other.average;
 	stdev = other.stdev;
 }
 
 float NormalToLatitude(glm::vec3 normal)
 {
-	return (atan2f(normal.y, sqrtf(powf(normal.x, 2) + powf(normal.z, 2))) + Constants::PI / 2.0f) / (1.0f * Constants::PI);
+	//normal = eAxesMatrix * normal;
+	float equatorial = sqrtf(powf(normal.x, 2) + powf(normal.y, 2));
+	float latitude = atan2f(normal.z, equatorial);
+	return latitude;
 }
 
 float NormalToLongitude(glm::vec3 normal)
 {
-	return (atan2f(normal.z, normal.x) + Constants::PI) / (2.0f * Constants::PI);
+	//normal = eAxesMatrix * normal;
+	float longitude = atan2f(normal.y, normal.x);
+	return longitude;
+}
+
+glm::vec3 LatitudeLongitudeToNormal(float latitude, float longitude)
+{
+	return glm::vec3(cosf(latitude) * cosf(longitude), cosf(latitude) * sinf(longitude), sinf(latitude));
+	//return eAxesMatrix * glm::vec3(sinf(latitude), cosf(latitude) * sinf(longitude), cosf(latitude) * -cosf(longitude));
 }

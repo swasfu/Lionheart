@@ -1,5 +1,10 @@
 #include "lionheart/graphics/GLVBO.h"
 
+GLVBO::GLVBO()
+{
+	id = 0;
+}
+
 GLVBO::GLVBO(std::vector<GLVertex>& vertices)
 {
 	glGenBuffers(1, &id);

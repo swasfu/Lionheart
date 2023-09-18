@@ -2,6 +2,8 @@
 
 #include "math/Random.h"
 
+#include <iostream>
+
 void CreateFractal(ValueMap& map, int size, float factor, float factorDecay)
 {
 	map.size = size;

@@ -1,5 +1,10 @@
 #include "lionheart/graphics/GLEBO.h"
 
+GLEBO::GLEBO()
+{
+	id = 0;
+}
+
 GLEBO::GLEBO(std::vector<GLuint>& indices)
 {
 	glGenBuffers(1, &id);

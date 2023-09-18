@@ -2,6 +2,8 @@
 
 #include "GLMesh.h"
 
+#include <thirdparty/glm/gtc/quaternion.hpp>
+
 class GLModel
 {
 public:
@@ -11,5 +13,5 @@ public:
 	glm::mat4 RotationMatrix();
 	GLMesh mesh;
 	glm::vec3 position;
-	glm::vec3 rotation;
+	glm::quat rotation;
 };
