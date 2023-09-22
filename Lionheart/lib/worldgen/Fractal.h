@@ -2,4 +2,4 @@
 
 #include "worldgen/ValueMap.h"
 
-void CreateFractal(ValueMap& map, int size, float factor, float factorDecay);
+void CreateFractal(ValueMap& map, int size, float factorDecay);

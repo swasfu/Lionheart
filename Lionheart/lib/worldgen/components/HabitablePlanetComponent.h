@@ -8,7 +8,7 @@
 
 struct HabitablePlanetComponent : public ComponentBase
 {
-	EntityID cloudsModel;
+	EntityID cloudsModelID;
 	ValueMap temperature;
 	ValueMap humidity;
 	ValueMap moisture;

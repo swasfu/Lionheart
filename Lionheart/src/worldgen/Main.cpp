@@ -1,5 +1,6 @@
 #include "worldgen/World.h"
 #include "worldgen/components/ModelComponent.h"
+#include "worldgen/components/CelestialBodyComponent.h"
 #include "worldgen/Fractal.h"
 #include "math/Constants.h"
 
@@ -24,6 +25,12 @@
 
 int windowWidth = 1920;
 int windowHeight = 1080;
+
+void DeltaTime(double time, float& last, float& delta)
+{
+	delta = (float)time - last;
+	last = (float)time;
+}
 
 int main(void)
 {
@@ -93,11 +100,14 @@ int main(void)
 		std::cout << std::endl;
 	}*/
 
-	World world;
-	world.GenerateTiles(&registry, worldSize, 50);
+	GenerateWorld(&registry, worldSize, 50, powf(2, 10));
+
+	float last = 0.0f;
+	float delta = 0.0f;
 
 	while (!glfwWindowShouldClose(window))
 	{
+		DeltaTime(glfwGetTime(), last, delta);
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		{
 			camera.orientation -= glm::normalize(camera.up) * cameraMoveSpeed;
@@ -134,9 +144,22 @@ int main(void)
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "projection"), 1, GL_FALSE, glm::value_ptr(camera.ProjectionMatrix(fov, 0.001f, 100.0f)));
 		glUniform3f(glGetUniformLocation(shaderProgram.id, "cameraPos"), camera.position.x, camera.position.y, camera.position.z);
 
-		auto modelIDs = registry.ViewIDs<ModelComponent>();
+		auto bodyIDs = registry.ViewIDs<CelestialBodyComponent>();
 
-		bool bullshit = true;
+		for (auto bodyID : bodyIDs)
+		{
+			auto body = registry.GetComponent<CelestialBodyComponent>(bodyID);
+
+			body->rotation *= glm::angleAxis(body->rotationSpeed * delta, glm::vec3(0.0f, 0.0f, 1.0f));
+
+			camera.position = body->position;
+
+			auto bodyModel = registry.GetComponent<ModelComponent>(body->bodyModelID);
+			bodyModel->model.position = body->position;
+			bodyModel->model.rotation = body->rotation;
+		}
+
+		auto modelIDs = registry.ViewIDs<ModelComponent>();
 
 		for (auto modelID : modelIDs)
 		{
@@ -144,9 +167,6 @@ int main(void)
 			auto& model = modelPtr->model;
 
 			model.mesh.vao.Bind();
-
-			model.rotation *= glm::angleAxis(glm::radians(360.0f / (60.0f * 24.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
-			camera.position = model.position;
 
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "translation"), 1, GL_FALSE, glm::value_ptr(model.TranslationMatrix()));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "rotation"), 1, GL_FALSE, glm::value_ptr(model.RotationMatrix()));

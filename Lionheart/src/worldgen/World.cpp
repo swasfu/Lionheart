@@ -66,33 +66,32 @@ PolyVertex* AddVertexIfNotExists(Polyhedron& polyhedron, PolyVertex& vertex, std
 	return newEdgeVertex;
 }
 
-glm::vec3 World::DetermineBiome(float latitude, float longitude)
+glm::vec3 DetermineBiome(CelestialBodyComponent* body, HabitablePlanetComponent* habitat, float latitude, float longitude)
 {
-	float altitude = altitudeMap.Value(latitude, longitude);
-	altitude -= altitudeMap.average;
-	altitude /= altitudeMap.stdev;
+	float altitude = body->topography.Value(latitude, longitude);
+	altitude -= body->topography.average;
+	altitude /= body->topography.stdev;
 
-	float precipitation = precipitationMap.Value(latitude, longitude);
-	precipitation -= precipitationMap.average;
-	precipitation /= precipitationMap.stdev;
+	float precipitation = habitat->humidity.Value(latitude, longitude);
+	precipitation -= habitat->humidity.average;
+	precipitation /= habitat->humidity.stdev;
 
-	float soil = soilMap.Value(latitude, longitude);
-	soil -= soilMap.average;
-	soil /= soilMap.stdev;
+	float soil = habitat->moisture.Value(latitude, longitude);
+	soil -= habitat->moisture.average;
+	soil /= habitat->moisture.stdev;
 
-	float temperature = temperatureMap.Value(latitude, longitude);
+	float temperature = habitat->temperature.Value(latitude, longitude);
 	temperature *= 100.0f;
 	temperature -= 50.0f;
-	precipitation -= (altitude > seaLevel ? (altitude - seaLevel) : 0) * 0.1f;
 
 	if (temperature < -20.0f)
 	{
 		return glm::vec3(224, 221, 216);
 	}
 
-	if (altitude < seaLevel)
+	if (altitude < 0.5f)
 	{
-		float scale = seaLevel - altitude;
+		float scale = 0.5f - altitude;
 		return glm::vec3(40 - scale * 40.0f, 120 - scale * 30.0f, 180 - scale * 20.0f);
 	}
 
@@ -251,19 +250,27 @@ glm::vec3 World::DetermineBiome(float latitude, float longitude)
 	}
 }
 
-World::World()
-{}
+void CreateBody(CelestialBodyComponent* body, float factor, int resolution)
+{
+	CreateFractal(body->topography, resolution, 1.55f);
+}
 
-void World::GenerateTiles(Registry* registry, float size, int subdivisions)
+void GenerateWorld(Registry* registry, float size, int subdivisions, int resolution)
 {
 	Random::Seed("test");
 
-	CreateFractal(altitudeMap, powf(2, 9), 1.0f, 1.55f);
-	CreateFractal(precipitationMap, powf(2, 9), 1.0f, 1.8f);
-	CreateFractal(soilMap, powf(2, 9), 1.0f, 1.8f);
-	CreateFractal(temperatureMap, powf(2, 9), 1.0f, 2.0f);
+	auto worldID = registry->RegisterEntity();
 
-	seaLevel = 0.5f;
+	auto body = registry->AddComponent<CelestialBodyComponent>(worldID);
+	CreateBody(body, 1.55f, resolution);
+
+	auto habitat = registry->AddComponent<HabitablePlanetComponent>(worldID);
+
+	CreateFractal(habitat->temperature, resolution, 2.0f);
+	CreateFractal(habitat->humidity, resolution, 2.0f);
+	CreateFractal(habitat->moisture, resolution, 1.8f);
+
+	float seaLevel = 0.5f;
 
 	Polyhedron icosahedron = Icosahedron(size);
 	Polyhedron geodesic;
@@ -342,8 +349,8 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 
 	std::cout << "Generating GL data...";
 	begin = std::chrono::steady_clock::now();
-	EntityID worldID = registry->RegisterEntity();
-	ModelComponent* worldModel = registry->AddComponent<ModelComponent>(worldID);
+	EntityID bodyModelID = registry->RegisterEntity();
+	ModelComponent* bodyModel = registry->AddComponent<ModelComponent>(bodyModelID);
 	std::map<TileComponent*, std::vector<int>> tileToVertexIndices;
 	std::map<TileComponent*, std::vector<PolyVertex*>> tileToNeighbourVertices;
 	std::map<PolyVertex*, TileComponent*> vertexToTile;
@@ -385,9 +392,9 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 		if (tile->longitude < minLongitude) minLongitude = tile->longitude;
 		if (tile->longitude > maxLongitude) maxLongitude = tile->longitude;
 
-		glm::vec3 faceColour = DetermineBiome(tile->latitude, tile->longitude) / 256.0f;
+		glm::vec3 faceColour = DetermineBiome(body, habitat, tile->latitude, tile->longitude) / 256.0f;
 
-		int oldVertexCount = worldModel->model.mesh.vertices.size();
+		int oldVertexCount = bodyModel->model.mesh.vertices.size();
 		for (auto& vertex : centreVertices)
 		{
 			GLVertex newVertex;
@@ -396,16 +403,16 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 			newVertex.colour = glm::vec4(faceColour, 1.0f);
 			newVertex.texUV = glm::vec2(0.0f);
 
-			worldModel->model.mesh.vertices.push_back(newVertex);
-			tileToVertexIndices[tile].push_back(worldModel->model.mesh.vertices.size() - 1);
+			bodyModel->model.mesh.vertices.push_back(newVertex);
+			tileToVertexIndices[tile].push_back(bodyModel->model.mesh.vertices.size() - 1);
 		}
 
 		std::vector<GLuint> indices = std::vector<GLuint>();
 		for (int i = 1; i < centreVertices.size() - 1; i++)
 		{
-			worldModel->model.mesh.indices.push_back(oldVertexCount);
-			worldModel->model.mesh.indices.push_back(oldVertexCount + i);
-			worldModel->model.mesh.indices.push_back(oldVertexCount + i + 1);
+			bodyModel->model.mesh.indices.push_back(oldVertexCount);
+			bodyModel->model.mesh.indices.push_back(oldVertexCount + i);
+			bodyModel->model.mesh.indices.push_back(oldVertexCount + i + 1);
 		}
 	}
 	end = std::chrono::steady_clock::now();
@@ -431,13 +438,15 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	end = std::chrono::steady_clock::now();
 	std::cout << " done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " milliseconds" << std::endl;
 
-	worldModel->model.mesh.Setup();
-	worldModel->model.position.z = -2000.0f;
-	worldModel->model.rotation = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::angleAxis(glm::radians(23.5f), glm::vec3(0.0f, 1.0f, 0.0f));
+	bodyModel->model.mesh.Setup();
+	body->bodyModelID = bodyModelID;
+
+	body->position.z = -2000.0f;
+	body->rotation = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::angleAxis(glm::radians(23.5f), glm::vec3(0.0f, 1.0f, 0.0f));
+	body->rotationSpeed = glm::radians(360.0f / (24.0f));
 
 	std::cout << "Geodesic vertex count: " << geodesic.vertices.size() << std::endl;
 	std::cout << "Geodesic face count: " << geodesic.faces.size() << std::endl;
-	std::cout << "Average face altitude: " << altitudeMap.average << std::endl;
 }
 
 /*

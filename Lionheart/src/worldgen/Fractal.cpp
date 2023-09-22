@@ -4,11 +4,12 @@
 
 #include <iostream>
 
-void CreateFractal(ValueMap& map, int size, float factor, float factorDecay)
+void CreateFractal(ValueMap& map, int size, float factorDecay)
 {
 	std::vector<float> mapData(size * size);
 	int subdivision = size / 2;
 	mapData[0] = Random::RandomFloat(0.0f, 1.0f);
+	float factor = 1.0f;
 	while (subdivision > 0)
 	{
 		for (int i = 0; i < (size / subdivision) + 1; i++)
