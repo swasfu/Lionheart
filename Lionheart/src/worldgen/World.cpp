@@ -1,5 +1,6 @@
 #include "worldgen/World.h"
 
+#include "worldgen/Constants.h"
 #include "worldgen/Fractal.h"
 #include "worldgen/components/TileComponent.h"
 #include "worldgen/components/CloudComponent.h"
@@ -19,11 +20,6 @@
 #include <iostream>
 #include <chrono>
 #include <map>
-
-glm::vec3 SphericalPoint(glm::vec3 point, float radius)
-{
-	return glm::normalize(point) * radius;
-}
 
 glm::vec3 Centroid(std::vector<glm::vec3>& points)
 {
@@ -254,31 +250,10 @@ void CreateBody(CelestialBodyComponent* body, float factor, int resolution)
 	CreateFractal(body->topography, resolution, 1.55f);
 }
 
-void GenerateWorld(Registry* registry, float size, int subdivisions, int resolution)
+void SubdivideIcosahedron(Polyhedron& geodesic, int subdivisions)
 {
-	Random::Seed("test");
+	Polyhedron icosahedron = Icosahedron(1.0f);
 
-	auto worldID = registry->RegisterEntity();
-
-	auto body = registry->AddComponent<CelestialBodyComponent>(worldID);
-	CreateBody(body, 1.55f, resolution);
-
-	auto habitat = registry->AddComponent<HabitablePlanetComponent>(worldID);
-
-	CreateFractal(habitat->temperature, resolution, 2.0f);
-	CreateFractal(habitat->humidity, resolution, 2.0f);
-	CreateFractal(habitat->moisture, resolution, 1.8f);
-
-	float seaLevel = 0.5f;
-
-	Polyhedron icosahedron = Icosahedron(size);
-	Polyhedron geodesic;
-
-	std::chrono::steady_clock::time_point begin;
-	std::chrono::steady_clock::time_point end;
-
-	std::cout << "Subdividing icosahedron into geodesic...";
-	begin = std::chrono::steady_clock::now();
 	std::vector<PolyVertex*> edgeVertices;
 	int edgeCount = 0;
 	int innerCount = 0;
@@ -334,6 +309,101 @@ void GenerateWorld(Registry* registry, float size, int subdivisions, int resolut
 			count++;
 		}
 	}
+}
+
+void UpdateHabitats(Registry* registry)
+{
+	auto worldIDs = registry->ViewIDs<HabitablePlanetComponent>();
+
+	for (auto worldID : worldIDs)
+	{
+		auto body = registry->GetComponent<CelestialBodyComponent>(worldID);
+		auto habitat = registry->GetComponent<HabitablePlanetComponent>(worldID);
+
+		int width = body->mapResolution;
+		int height = body->mapResolution / 2;
+		int size = width * height;
+
+		ValueMap temperatureCopy = habitat->temperature;
+		ValueMap humidityCopy = habitat->humidity;
+		ValueMap moistureCopy = habitat->moisture;
+
+		glm::vec3 sunDirection = glm::normalize(-body->position);
+
+		for (int x = 0; x < width; x++)
+		{
+			for (int y = 0; y < height; y++)
+			{
+				int index = x * height + y;
+				int topIndex = index - 1;
+				if (y == 0) topIndex = index > size / 2 ? index - size / 2 : index + size / 2;
+				int bottomIndex = index + 1;
+				if (y == (height - 1))bottomIndex = index > size / 2 ? index - size / 2 : index + size / 2;
+				int leftIndex = index - height;
+				if (leftIndex < 0) leftIndex += size;
+				int rightIndex = index + height;
+				if (rightIndex > size) rightIndex -= size;
+
+				// Sun heats the surface
+				temperatureCopy[index] *= (1.0f - Constants::SPACE_LOSS);
+				temperatureCopy[index] += (Constants::SPACE_LOSS * Constants::SPACE_TEMP);
+				float sunAmount = glm::dot(temperatureCopy.MapCoordsToNormal(x, y), sunDirection);
+				sunAmount = powf(sunAmount, Constants::SUN_EXP);
+				if (sunAmount > 0) temperatureCopy[index] += sunAmount * Constants::SUN_EFFECT;
+
+				// Water evaporates
+				if (body->topography[index] < 0)
+				{
+					humidityCopy[index] += sunAmount * Constants::EVAP_RATE;
+				}
+
+				// Wind pushes cool air and water vapour to warm areas
+				int coolestIndex = index;
+				for (auto neighbourIndex : { topIndex, leftIndex, rightIndex, bottomIndex })
+				{
+					if (habitat->temperature[neighbourIndex] < habitat->temperature[coolestIndex])
+					{
+						coolestIndex = neighbourIndex;
+					}
+				}
+
+				if (coolestIndex != index)
+				{
+					float tempDiff = habitat->temperature[index] - habitat->temperature[coolestIndex];
+					float windChange = (tempDiff / 2.0f) * Constants::WIND_EFF;
+					temperatureCopy[index] -= windChange;
+					temperatureCopy[coolestIndex] += windChange;
+
+				}
+			}
+		}
+	}
+}
+
+void GenerateWorld(Registry* registry, float size, int subdivisions, int resolution)
+{
+	Random::Seed("test");
+
+	auto worldID = registry->RegisterEntity();
+
+	auto body = registry->AddComponent<CelestialBodyComponent>(worldID);
+	CreateBody(body, 1.55f, resolution);
+
+	auto habitat = registry->AddComponent<HabitablePlanetComponent>(worldID);
+
+	CreateFractal(habitat->temperature, resolution, 2.0f);
+	CreateFractal(habitat->humidity, resolution, 2.0f);
+	CreateFractal(habitat->moisture, resolution, 1.8f);
+
+	float seaLevel = 0.5f;
+
+	std::chrono::steady_clock::time_point begin;
+	std::chrono::steady_clock::time_point end;
+
+	std::cout << "Subdividing icosahedron into geodesic...";
+	begin = std::chrono::steady_clock::now();
+	Polyhedron geodesic;
+	SubdivideIcosahedron(geodesic, subdivisions);
 	end = std::chrono::steady_clock::now();
 	std::cout << " done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
 
@@ -353,10 +423,6 @@ void GenerateWorld(Registry* registry, float size, int subdivisions, int resolut
 	std::map<TileComponent*, std::vector<int>> tileToVertexIndices;
 	std::map<TileComponent*, std::vector<PolyVertex*>> tileToNeighbourVertices;
 	std::map<PolyVertex*, TileComponent*> vertexToTile;
-	float maxLatitude = 0.0f;
-	float minLatitude = 10.0f;
-	float maxLongitude = 0.0f;
-	float minLongitude = 10.0f;
 	for (auto& vertex : geodesic.vertices)
 	{
 		EntityID tileEntityID = registry->RegisterEntity();
@@ -386,11 +452,6 @@ void GenerateWorld(Registry* registry, float size, int subdivisions, int resolut
 		glm::vec3 tileNormal = glm::normalize(Centroid(centreVertices));
 		NormalToLatitudeLongitude(tileNormal, tile->latitude, tile->longitude);
 
-		if (tile->latitude < minLatitude) minLatitude = tile->latitude;
-		if (tile->latitude > maxLatitude) maxLatitude = tile->latitude;
-		if (tile->longitude < minLongitude) minLongitude = tile->longitude;
-		if (tile->longitude > maxLongitude) maxLongitude = tile->longitude;
-
 		glm::vec3 faceColour = DetermineBiome(body, habitat, tile->latitude, tile->longitude) / 256.0f;
 
 		int oldVertexCount = bodyModel->model.mesh.vertices.size();
@@ -416,11 +477,6 @@ void GenerateWorld(Registry* registry, float size, int subdivisions, int resolut
 	}
 	end = std::chrono::steady_clock::now();
 	std::cout << "done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
-
-	std::cout << "Maximum latitude: " << maxLatitude << std::endl;
-	std::cout << "Minimum latitude: " << minLatitude << std::endl;
-	std::cout << "Maximum longitude: " << maxLongitude << std::endl;
-	std::cout << "Minimum longitude: " << minLongitude << std::endl;
 
 	std::cout << "Resolving tile neighbours...";
 	begin = std::chrono::steady_clock::now();

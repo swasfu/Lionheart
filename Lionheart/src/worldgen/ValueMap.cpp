@@ -93,6 +93,11 @@ float ValueMap::Value(float latitude, float longitude)
 	return values[height * (int)(longitude * (width - 1)) + (int)(latitude * (height - 1))];
 }
 
+float ValueMap::ValueXY(int x, int y)
+{
+	return values[x * height + y];
+}
+
 float ValueMap::MapCoordsToLatitude(int y)
 {
 	float latitude = ((float)y / (float)(height - 1)) * Constants::PI - Constants::HALF_PI;
@@ -111,12 +116,24 @@ void ValueMap::MapCoordsToLatitudeLongitude(int x, int y, float& latitude, float
 	longitude = ((float)x / (float)(width - 1)) * Constants::TWO_PI - Constants::PI;
 }
 
+glm::vec3 ValueMap::MapCoordsToNormal(int x, int y)
+{
+	float latitude, longitude;
+	MapCoordsToLatitudeLongitude(x, y, latitude, longitude);
+	return LatitudeLongitudeToNormal(latitude, longitude);
+}
+
 void ValueMap::operator=(ValueMap& other)
 {
 	values = other.values;
 	width = other.width;
 	average = other.average;
 	stdev = other.stdev;
+}
+
+float& ValueMap::operator[](int index)
+{
+	return values[index];
 }
 
 float NormalToLatitude(glm::vec3 normal)
@@ -141,5 +158,5 @@ void NormalToLatitudeLongitude(glm::vec3 normal, float& latitude, float& longitu
 
 glm::vec3 LatitudeLongitudeToNormal(float latitude, float longitude)
 {
-	return glm::vec3(cosf(latitude) * cosf(longitude), cosf(latitude) * sinf(longitude), sinf(latitude));
+	return glm::normalize(glm::vec3(cosf(latitude) * cosf(longitude), cosf(latitude) * sinf(longitude), sinf(latitude)));
 }

@@ -198,6 +198,7 @@
     <ClInclude Include="lib\thirdparty\stb\stb_image.h" />
     <ClInclude Include="lib\worldgen\components\CelestialBodyComponent.h" />
     <ClInclude Include="lib\worldgen\components\CloudComponent.h" />
+    <ClInclude Include="lib\worldgen\Constants.h" />
     <ClInclude Include="lib\worldgen\Fractal.h" />
     <ClInclude Include="lib\worldgen\systems\WorldGeneration.h" />
     <ClInclude Include="lib\worldgen\ValueMap.h" />

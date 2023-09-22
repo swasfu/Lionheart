@@ -1,6 +1,7 @@
 #include "worldgen/World.h"
 #include "worldgen/components/ModelComponent.h"
 #include "worldgen/components/CelestialBodyComponent.h"
+#include "worldgen/components/HabitablePlanetComponent.h"
 #include "worldgen/Fractal.h"
 #include "math/Constants.h"
 
@@ -72,33 +73,6 @@ int main(void)
 	glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	glUniform4f(glGetUniformLocation(shaderProgram.id, "lightColour"), lightColour.x, lightColour.y, lightColour.z, lightColour.w);
-	glUniform3f(glGetUniformLocation(shaderProgram.id, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
-
-	/*ValueMap test;
-	int testSize = pow(2, 5);
-	CreateFractal(test, testSize, 1.0f, 1.55f);
-	std::cout << "Width: " << test.width << std::endl;
-	std::cout << "Height: " << test.height << std::endl;
-	std::cout << "X-Y" << std::endl;
-	for (int y = 0; y < testSize / 2; y++)
-	{
-		for (int x = 0; x < testSize; x++)
-		{
-			std::cout << (int)(test.values[x * test.height + y] * 9.f) << " ";
-		}
-		std::cout << std::endl;
-	}
-
-
-	std::cout << "LAT-LON" << std::endl;
-	for (float y = -Constants::HALF_PI; y < Constants::HALF_PI; y += (Constants::PI / (float)(testSize / 2)))
-	{
-		for (float x = -Constants::PI; x < Constants::PI; x += (Constants::TWO_PI / (float)testSize))
-		{
-			std::cout << (int)(test.Value(y, x) * 9.0f) << " ";
-		}
-		std::cout << std::endl;
-	}*/
 
 	GenerateWorld(&registry, worldSize, 50, powf(2, 10));
 
@@ -141,16 +115,17 @@ int main(void)
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "view"), 1, GL_FALSE, glm::value_ptr(camera.ViewMatrix()));
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "projection"), 1, GL_FALSE, glm::value_ptr(camera.ProjectionMatrix(fov, 0.001f, 100.0f)));
 
-		auto bodyIDs = registry.ViewIDs<CelestialBodyComponent>();
+		auto worldIDs = registry.ViewIDs<HabitablePlanetComponent>();
 
-		for (auto bodyID : bodyIDs)
+		for (auto worldID : worldIDs)
 		{
-			auto body = registry.GetComponent<CelestialBodyComponent>(bodyID);
+			auto body = registry.GetComponent<CelestialBodyComponent>(worldID);
 
 			body->rotation *= glm::angleAxis(body->rotationSpeed * delta, glm::vec3(0.0f, 0.0f, 1.0f));
 
 			camera.position = body->position;
 			camera.position += -glm::normalize(camera.orientation) * cameraDepth;
+			glUniform3f(glGetUniformLocation(shaderProgram.id, "lightPos"), -camera.position.x, -camera.position.y, -camera.position.z);
 
 			auto bodyModel = registry.GetComponent<ModelComponent>(body->bodyModelID);
 			bodyModel->model.floatingPosition = body->position;
@@ -170,8 +145,6 @@ int main(void)
 
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "translation"), 1, GL_FALSE, glm::value_ptr(model.TranslationMatrix()));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "rotation"), 1, GL_FALSE, glm::value_ptr(model.RotationMatrix()));
-
-			std::cout << model.position.x << ", " << model.position.y << ", " << model.position.z << std::endl;
 
 			glDrawElements(GL_TRIANGLES, model.mesh.indices.size(), GL_UNSIGNED_INT, 0);
 		}

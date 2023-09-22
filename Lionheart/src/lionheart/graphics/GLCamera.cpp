@@ -4,7 +4,7 @@
 
 GLCamera::GLCamera(int width, int height) : width(width), height(height)
 {
-	orientation = glm::vec3(0.0f, 0.0f, -1.0f);
+	orientation = glm::vec3(0.0f, 0.0f, 1.0f);
 	up = glm::vec3(0.0f, 1.0f, 0.0f);
 }
 

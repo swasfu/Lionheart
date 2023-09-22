@@ -90,6 +90,7 @@
     <ClInclude Include="lib\lionheart\ecs\Scheduler.h" />
     <ClInclude Include="lib\worldgen\systems\WorldGeneration.h" />
     <ClInclude Include="lib\worldgen\components\CelestialBodyComponent.h" />
+    <ClInclude Include="lib\worldgen\Constants.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="lib\1240\components\creatures\BodyPartAttachedComponent.h" />

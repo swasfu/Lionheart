@@ -22,7 +22,7 @@ void main()
     float diffuse = max(dot(normal, lightDirection), 0.0f);
 
     // specular lighting
-    vec3 look = normalize(cameraPos - vPosition);
+    vec3 look = normalize(-vPosition);
     vec3 reflection = reflect(-lightDirection, vNormal);
     float specular = pow(max(dot(look, reflection), 0.0f), 8) * 0.2f;
 
