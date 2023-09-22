@@ -10,7 +10,7 @@ GLCamera::GLCamera(int width, int height) : width(width), height(height)
 
 glm::mat4 GLCamera::ViewMatrix()
 {
-	return glm::lookAt(position, position + orientation, up);
+	return glm::lookAt(glm::vec3(0.0f), orientation, up);
 }
 
 glm::mat4 GLCamera::ProjectionMatrix(float fov, float near, float far)

@@ -57,9 +57,9 @@ int main(void)
 
 	GLShaderProgram shaderProgram("data/shaders/defaultVertexShader.glsl", "data/shaders/defaultFragmentShader.glsl");
 
-	float worldSize = 10.0f;
+	float worldSize = 6.371f;
 
-	float cameraDepth = 12.0f;
+	float cameraDepth = 2 * worldSize;
 	float cameraMoveSpeed = 0.005f * worldSize;
 	float cameraZoomSpeed = 0.01f * worldSize;
 	float fov = 75.0f;
@@ -133,8 +133,6 @@ int main(void)
 			cameraDepth -= cameraZoomSpeed;
 		}
 
-		camera.position += -glm::normalize(camera.orientation) * cameraDepth;
-
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_CULL_FACE);
@@ -142,7 +140,6 @@ int main(void)
 		shaderProgram.Use();
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "view"), 1, GL_FALSE, glm::value_ptr(camera.ViewMatrix()));
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "projection"), 1, GL_FALSE, glm::value_ptr(camera.ProjectionMatrix(fov, 0.001f, 100.0f)));
-		glUniform3f(glGetUniformLocation(shaderProgram.id, "cameraPos"), camera.position.x, camera.position.y, camera.position.z);
 
 		auto bodyIDs = registry.ViewIDs<CelestialBodyComponent>();
 
@@ -153,9 +150,10 @@ int main(void)
 			body->rotation *= glm::angleAxis(body->rotationSpeed * delta, glm::vec3(0.0f, 0.0f, 1.0f));
 
 			camera.position = body->position;
+			camera.position += -glm::normalize(camera.orientation) * cameraDepth;
 
 			auto bodyModel = registry.GetComponent<ModelComponent>(body->bodyModelID);
-			bodyModel->model.position = body->position;
+			bodyModel->model.floatingPosition = body->position;
 			bodyModel->model.rotation = body->rotation;
 		}
 
@@ -166,10 +164,14 @@ int main(void)
 			auto modelPtr = registry.GetComponent<ModelComponent>(modelID);
 			auto& model = modelPtr->model;
 
+			model.position = model.floatingPosition - camera.position;
+
 			model.mesh.vao.Bind();
 
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "translation"), 1, GL_FALSE, glm::value_ptr(model.TranslationMatrix()));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "rotation"), 1, GL_FALSE, glm::value_ptr(model.RotationMatrix()));
+
+			std::cout << model.position.x << ", " << model.position.y << ", " << model.position.z << std::endl;
 
 			glDrawElements(GL_TRIANGLES, model.mesh.indices.size(), GL_UNSIGNED_INT, 0);
 		}

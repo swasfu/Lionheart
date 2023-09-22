@@ -7,7 +7,7 @@ class GLCamera
 {
 public:
 	GLCamera(int width, int height);
-	glm::vec3 position;
+	glm::dvec3 position;
 	glm::vec3 orientation;
 	glm::vec3 up;
 

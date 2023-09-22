@@ -38,7 +38,6 @@ void WindOutward(std::vector<glm::vec3>& vertices, bool ccw)
 
 
 	glm::vec3 centre = Centroid(vertices);
-
 	glm::vec3 a = vertices[0] - centre;
 
 	for (auto& vertex : vertices)
@@ -55,7 +54,7 @@ void WindOutward(std::vector<glm::vec3>& vertices, bool ccw)
 	}
 }
 
-PolyVertex* AddVertexIfNotExists(Polyhedron& polyhedron, PolyVertex& vertex, std::vector<PolyVertex*>& existingVertices)
+PolyVertex* AddEdgeVertex(Polyhedron& polyhedron, PolyVertex& vertex, std::vector<PolyVertex*>& existingVertices)
 {
 	for (auto& edgeVertex : existingVertices)
 	{
@@ -298,7 +297,7 @@ void GenerateWorld(Registry* registry, float size, int subdivisions, int resolut
 		for (int i = 0; i < subdivisions + 1; i++)
 		{
 			PolyVertex nextA = PolyVertex(a);
-			vertices.push_back(AddVertexIfNotExists(geodesic, nextA, edgeVertices));
+			vertices.push_back(AddEdgeVertex(geodesic, nextA, edgeVertices));
 			c = a;
 			for (int j = 1; j < subdivisions + 1 - i; j++)
 			{
@@ -307,7 +306,7 @@ void GenerateWorld(Registry* registry, float size, int subdivisions, int resolut
 				if (i == 0 || j == (subdivisions - i))
 				{
 					PolyVertex nextC = PolyVertex(c);
-					vertices.push_back(AddVertexIfNotExists(geodesic, nextC, edgeVertices));
+					vertices.push_back(AddEdgeVertex(geodesic, nextC, edgeVertices));
 				} else
 				{
 					vertices.push_back(geodesic.AddVertex(nextC));
@@ -441,230 +440,10 @@ void GenerateWorld(Registry* registry, float size, int subdivisions, int resolut
 	bodyModel->model.mesh.Setup();
 	body->bodyModelID = bodyModelID;
 
-	body->position.z = -2000.0f;
+	body->position.z = 150160;
 	body->rotation = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::angleAxis(glm::radians(23.5f), glm::vec3(0.0f, 1.0f, 0.0f));
 	body->rotationSpeed = glm::radians(360.0f / (24.0f));
 
 	std::cout << "Geodesic vertex count: " << geodesic.vertices.size() << std::endl;
 	std::cout << "Geodesic face count: " << geodesic.faces.size() << std::endl;
 }
-
-/*
-
-void UpdateTemperature(HabitablePlanetComponent* planet, CelestialBodyComponent* body)
-{
-	glm::vec3 sunDirection = glm::normalize(-body->position);
-	auto& altitudeMap = body->topography;
-	auto& temperatureMap = planet->temperature;
-	float spaceTemp = -270.0f;
-	float spaceLoss = 0.00042f;
-	float sunEffect = 0.4f;
-	float sunExp = 0.9f;
-	for (int i = 0; i < temperatureMap.width - 1; i++)
-	{
-		for (int j = 0; j < temperatureMap.width - 1; j++)
-		{
-			auto& temperature = temperatureMap.values[i * temperatureMap.width + j];
-			float latitude, longitude;
-			temperatureMap.MapCoordsToLatitudeLongitude(i, j, latitude, longitude);
-			float altitudeDeviation = (altitudeMap.Value(latitude, longitude) - planet->seaLevel) / altitudeMap.stdev;
-			float localSpaceLoss = spaceLoss * ((altitudeDeviation >= 0) ? (1.0f + (powf(altitudeDeviation, 2.0f) * 0.02f)) : 1.0f);
-			glm::vec3 normal = LatitudeLongitudeToNormal(latitude, longitude);
-			float sunAmount = glm::dot(normal, sunDirection);
-			temperatureMap.values[i * temperatureMap.width + j] *= (1.0f - localSpaceLoss);
-			temperatureMap.values[i * temperatureMap.width + j] += localSpaceLoss * spaceTemp;
-			if (sunAmount > 0)
-			{
-				temperatureMap.values[i * temperatureMap.width + j] += powf(sunAmount, sunExp) * sunEffect;
-			}
-		}
-	}
-	temperatureMap.Average();
-	temperatureMap.Stdev(temperatureMap.average);
-}
-
-void UpdateHabitat(HabitablePlanetComponent* habitat, CelestialBodyComponent* body)
-{
-	glm::vec3 sun = glm::normalize(-body->position);
-	auto& topography = body->topography;
-	auto& temperature = habitat->temperature;
-	auto& humidity = habitat->humidity;
-	auto& moisture = habitat->moisture;
-	int resolution = body->mapResolution;
-	for (int i = 0; i < resolution - 1; i++)
-	{
-		for (int j = 0; j < resolution - 1; j++)
-		{
-			int index = i * resolution + j;
-			float& localTemperature = temperature.values[index];
-			float& localAltitude = topography.values[index];
-			float& localHumidity = humidity.values[index];
-			float& localMoisture = moisture.values[index];
-
-
-
-			float localSpaceLoss = spaceLoss * ((altitudeDeviation >= 0) ? (1.0f + (powf(altitudeDeviation, 2.0f) * 0.02f)) : 1.0f);
-			glm::vec3 normal = LatitudeLongitudeToNormal(latitude, longitude);
-			float sunAmount = glm::dot(normal, sunDirection);
-			temperatureMap.values[i * temperatureMap.size + j] *= (1.0f - localSpaceLoss);
-			temperatureMap.values[i * temperatureMap.size + j] += localSpaceLoss * spaceTemp;
-			if (sunAmount > 0)
-			{
-				temperatureMap.values[i * temperatureMap.size + j] += powf(sunAmount, sunExp) * sunEffect;
-			}
-		}
-	}
-}
-
-void GenerateTiles(Registry* registry, EntityID worldID, int subdivisions)
-{
-	Polyhedron icosahedron = Icosahedron(1.0f);
-	Polyhedron geodesic;
-
-	std::vector<PolyVertex*> edgeVertices;
-	int edgeCount = 0;
-	int innerCount = 0;
-	for (auto& face : icosahedron.faces)
-	{
-		glm::vec3 a = face->vertices[0]->coords;
-		glm::vec3 b = face->vertices[1]->coords;
-		glm::vec3 c = face->vertices[2]->coords;
-
-		glm::vec3 ab = (b - a) / (float)subdivisions;
-		glm::vec3 ac = (c - a) / (float)subdivisions;
-		glm::vec3 bc = (c - b) / (float)subdivisions;
-
-		std::vector<PolyVertex*> vertices;
-		vertices.reserve(((2 + subdivisions) * (1 + subdivisions)) / 2);
-		for (int i = 0; i < subdivisions + 1; i++)
-		{
-			PolyVertex nextA = PolyVertex(a);
-			vertices.push_back(AddVertexIfNotExists(geodesic, nextA, edgeVertices));
-			c = a;
-			for (int j = 1; j < subdivisions + 1 - i; j++)
-			{
-				c += ac;
-				PolyVertex nextC = PolyVertex(c);
-				if (i == 0 || j == (subdivisions - i))
-				{
-					PolyVertex nextC = PolyVertex(c);
-					vertices.push_back(AddVertexIfNotExists(geodesic, nextC, edgeVertices));
-				} else
-				{
-					vertices.push_back(geodesic.AddVertex(nextC));
-				}
-			}
-			a += ab;
-		}
-
-		int count = 0;
-		for (int i = subdivisions; i > 0; i--)
-		{
-			for (int j = 0; j < i; j++)
-			{
-				std::vector<PolyVertex*> forwardVertices = { vertices[count], vertices[count + 1], vertices[count + i + 1] };
-				Polygon forwardTriangle = Polygon(forwardVertices);
-				geodesic.AddFace(forwardTriangle);
-				if (j != 0)
-				{
-					std::vector<PolyVertex*> backwardVertices = { vertices[count], vertices[count + i], vertices[count + i + 1] };
-					Polygon backwardTriangle = Polygon(backwardVertices);
-					geodesic.AddFace(backwardTriangle);
-				}
-				count++;
-			}
-			count++;
-		}
-	}
-
-	for (auto& vertex : geodesic.vertices) vertex->coords = glm::normalize(vertex->coords);
-
-	ModelComponent* worldModel = registry->AddComponent<ModelComponent>(worldID);
-	std::map<TileComponent*, std::vector<int>> tileToVertexIndices;
-	std::map<TileComponent*, std::vector<PolyVertex*>> tileToNeighbourVertices;
-	std::map<PolyVertex*, TileComponent*> vertexToTile;
-	for (auto& vertex : geodesic.vertices)
-	{
-		EntityID tileEntityID = registry->RegisterEntity();
-
-		TileComponent* tile = registry->AddComponent<TileComponent>(tileEntityID);
-		vertexToTile[vertex.get()] = tile;
-		tile->worldID = worldID;
-
-		std::vector<glm::vec3> centreVertices;
-
-		auto& neighbourVertices = tileToNeighbourVertices[tile];
-
-		for (auto& memberPolygon : vertex->memberPolygons)
-		{
-			centreVertices.push_back(memberPolygon->Centroid());
-			for (auto& neighbourVertex : memberPolygon->vertices)
-			{
-				if (std::find(neighbourVertices.begin(), neighbourVertices.end(), neighbourVertex) == neighbourVertices.end())
-				{
-					neighbourVertices.push_back(neighbourVertex);
-				}
-			}
-		}
-
-		WindOutward(centreVertices, true);
-
-		std::vector<GLVertex> vertices;
-
-		float latitude = NormalToLatitude(vertex->coords);
-		float longitude = NormalToLongitude(vertex->coords);
-
-		tile->latitude = latitude;
-		tile->longitude = longitude;
-
-		glm::vec3 faceColour = glm::vec3(1.0f);
-
-		int oldVertexCount = worldModel->model.mesh.vertices.size();
-		for (auto& centreVertex : centreVertices)
-		{
-			GLVertex newVertex;
-			newVertex.position = centreVertex;
-			newVertex.normal = vertex->coords;
-			newVertex.colour = glm::vec4(faceColour, 1.0f);
-			newVertex.texUV = glm::vec2(0.0f);
-
-			worldModel->model.mesh.vertices.push_back(newVertex);
-			tileToVertexIndices[tile].push_back(worldModel->model.mesh.vertices.size() - 1);
-		}
-
-		std::vector<GLuint> indices = std::vector<GLuint>();
-		for (int i = 1; i < centreVertices.size() - 1; i++)
-		{
-			worldModel->model.mesh.indices.push_back(oldVertexCount);
-			worldModel->model.mesh.indices.push_back(oldVertexCount + i);
-			worldModel->model.mesh.indices.push_back(oldVertexCount + i + 1);
-		}
-	}
-
-	for (auto& pair : tileToNeighbourVertices)
-	{
-		auto tile = pair.first;
-		auto& neighbours = pair.second;
-		for (auto& neighbour : neighbours)
-		{
-			auto neighbourTile = vertexToTile[neighbour];
-			tile->neighbours.push_back(tile->id);
-		}
-	}
-}
-
-void GenerateWorld(Registry* registry, int subdivisions)
-{
-	EntityID worldID = registry->RegisterEntity();
-	auto planet = registry->AddComponent<HabitablePlanetComponent>(worldID);
-	auto body = registry->AddComponent<CelestialBodyComponent>(worldID);
-
-	int mapResolution = powf(2, 9);
-
-	CreateFractal(body->topography, mapResolution, 1.0f, 1.55f);
-
-
-
-	GenerateTiles(registry, worldID, subdivisions);
-}
-*/

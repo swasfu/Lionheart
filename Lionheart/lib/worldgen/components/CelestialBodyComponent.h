@@ -14,7 +14,7 @@ struct CelestialBodyComponent : public ComponentBase
 	std::string name;
 	EntityID bodyModelID;
 	ValueMap topography;
-	glm::vec3 position;
+	glm::dvec3 position;
 	glm::vec3 velocity;
 	glm::quat rotation;
 	float mass;

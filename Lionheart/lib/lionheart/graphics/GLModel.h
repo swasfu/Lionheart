@@ -12,6 +12,7 @@ public:
 	glm::mat4 TranslationMatrix();
 	glm::mat4 RotationMatrix();
 	GLMesh mesh;
+	glm::dvec3 floatingPosition;
 	glm::vec3 position;
 	glm::quat rotation;
 };
