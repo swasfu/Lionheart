@@ -25,6 +25,7 @@
     <ClCompile Include="src\lionheart\ecs\Registry.cpp" />
     <ClCompile Include="src\worldgen\World.cpp" />
     <ClCompile Include="src\worldgen\Fractal.cpp" />
+    <ClCompile Include="src\lionheart\ecs\Scheduler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\1240\components\creatures\BodyPartComponent.h" />
@@ -75,7 +76,6 @@
     <ClInclude Include="lib\lionheart\graphics\GLCamera.h" />
     <ClInclude Include="lib\lionheart\ecs\ComponentBase.h" />
     <ClInclude Include="lib\lionheart\ecs\Registry.h" />
-    <ClInclude Include="lib\lionheart\ecs\SystemBase.h" />
     <ClInclude Include="lib\lionheart\graphics\GLMesh.h" />
     <ClInclude Include="lib\lionheart\graphics\GLModel.h" />
     <ClInclude Include="lib\math\Random.h" />
@@ -83,10 +83,13 @@
     <ClInclude Include="lib\worldgen\ValueMap.h" />
     <ClInclude Include="lib\worldgen\components\ModelComponent.h" />
     <ClInclude Include="lib\worldgen\components\TileComponent.h" />
-    <ClInclude Include="lib\worldgen\components\WorldComponent.h" />
+    <ClInclude Include="lib\worldgen\components\HabitablePlanetComponent.h" />
     <ClInclude Include="lib\lionheart\graphics\GLComputeShader.h" />
     <ClInclude Include="lib\worldgen\Fractal.h" />
     <ClInclude Include="lib\worldgen\components\CloudComponent.h" />
+    <ClInclude Include="lib\lionheart\ecs\Scheduler.h" />
+    <ClInclude Include="lib\worldgen\systems\WorldGeneration.h" />
+    <ClInclude Include="lib\worldgen\components\CelestialBodyComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="lib\1240\components\creatures\BodyPartAttachedComponent.h" />

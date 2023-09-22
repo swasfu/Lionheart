@@ -8,6 +8,7 @@ class World
 {
 public:
 	World();
+	glm::vec3 DetermineBiome(float latitude, float longitude);
 	void GenerateTiles(Registry* registry, float size, int subdivisions);
 	void GenerateClouds(Registry* registry, float size, int subdivisions);
 	void GenerateClimateMap();

@@ -28,7 +28,8 @@ struct ValueMap
 	void operator=(ValueMap& other);
 
 	std::vector<float> values;
-	int size;
+	int width;
+	int height;
 	float average;
 	float stdev;
 };

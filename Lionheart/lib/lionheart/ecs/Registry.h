@@ -13,6 +13,7 @@ class Registry
 public:
 	EntityID RegisterEntity();
 	EntityID RegisterEntity(std::string);
+	void RemoveEntity(EntityID id);
 
 	template<typename T>
 	std::unordered_map<EntityID, std::unique_ptr<ComponentBase>>& GetComponentMap();

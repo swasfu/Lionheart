@@ -66,17 +66,7 @@ int main(void)
 	glUniform3f(glGetUniformLocation(shaderProgram.id, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
 	World world;
-	world.GenerateTiles(&registry, worldSize, 50);
-	world.UpdateTemperatureModel(&registry);
-
-	int cloudCounter = 0;
-
-	glm::vec3 test = glm::vec3(0.0f, 1.0f, 0.0f);
-	float latitude = NormalToLatitude(test);
-	float longitude = NormalToLongitude(test);
-	glm::vec3 result = LatitudeLongitudeToNormal(latitude, longitude);
-	std::cout << latitude << ", " << longitude << std::endl;
-	std::cout << "(" << result.x << ", " << result.y << ", " << result.z << ")" << std::endl;
+	world.GenerateTiles(&registry, worldSize, 100);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -127,32 +117,11 @@ int main(void)
 
 			model.mesh.vao.Bind();
 
-			if (bullshit)
-			{
-				cloudCounter++;
-				if (cloudCounter == 60)
-				{
-					world.UpdateTemperature(glm::normalize(glm::vec3(glm::inverse(model.RotationMatrix()) * glm::vec4(-model.position, 1.0f))), 1.0f);
-					world.UpdateTemperatureModel(&registry);
-					cloudCounter = 0;
-				}
-				model.rotation *= glm::angleAxis(glm::radians(360.0f / (60.0f * 24.0f)), glm::vec3(0.0f, 0.0f, 1.0f));// *model.rotation;
-
-				camera.position = model.position;
-			} else
-			{
-			}
+			model.rotation *= glm::angleAxis(glm::radians(360.0f / (60.0f * 24.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
+			camera.position = model.position;
 
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "translation"), 1, GL_FALSE, glm::value_ptr(model.TranslationMatrix()));
 			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.id, "rotation"), 1, GL_FALSE, glm::value_ptr(model.RotationMatrix()));
-			if (bullshit)
-			{
-				glUniform1f(glGetUniformLocation(shaderProgram.id, "alpha"), 1.0f);
-				bullshit = false;
-			} else
-			{
-				glUniform1f(glGetUniformLocation(shaderProgram.id, "alpha"), 0.5f);
-			}
 
 			glDrawElements(GL_TRIANGLES, model.mesh.indices.size(), GL_UNSIGNED_INT, 0);
 		}

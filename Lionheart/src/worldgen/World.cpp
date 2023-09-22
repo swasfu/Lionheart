@@ -4,6 +4,8 @@
 #include "worldgen/components/TileComponent.h"
 #include "worldgen/components/CloudComponent.h"
 #include "worldgen/components/ModelComponent.h"
+#include "worldgen/components/HabitablePlanetComponent.h"
+#include "worldgen/components/CelestialBodyComponent.h"
 
 #include "math/polygons/Polyhedron.h"
 #include "math/polygons/Icosahedron.h"
@@ -17,46 +19,6 @@
 #include <iostream>
 #include <chrono>
 #include <map>
-
-/*
-struct TerrainQuadrant
-{
-	TerrainQuadrant(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 d, float altitude) : a(a), b(b), c(c), d(d), altitude(altitude)
-	{}
-	glm::vec3 a, b, c, d;
-	float altitude;
-};
-
-std::vector<TerrainQuadrant> QuarterQuadrant(TerrainQuadrant quadrant, float range)
-{
-	glm::vec3 AB = quadrant.b - quadrant.a;
-	glm::vec3 AD = quadrant.d - quadrant.a;
-	glm::vec3 BC = quadrant.c - quadrant.b;
-	glm::vec3 DC = quadrant.d - quadrant.c;
-	glm::vec3 AC = quadrant.c - quadrant.a;
-
-	std::vector<TerrainQuadrant> quarters;
-	quarters.push_back(TerrainQuadrant(quadrant.a, quadrant.a + (AB / 2.0f), quadrant.a + (AC / 2.0f), quadrant.a + (AD / 2.0f), quadrant.altitude + ((float)rand() / RAND_MAX) * range - (range / 2)));
-	quarters.push_back(TerrainQuadrant(quadrant.a + (AB / 2.0f), quadrant.b, quadrant.b + (BC / 2.0f), quadrant.a + (AC / 2.0f), quadrant.altitude + ((float)rand() / RAND_MAX) * range - (range / 2)));
-	quarters.push_back(TerrainQuadrant(quadrant.a + (AC / 2.0f), quadrant.b + (BC / 2.0f), quadrant.c, quadrant.d + (DC / 2.0f), quadrant.altitude + ((float)rand() / RAND_MAX) * range - (range / 2)));
-	quarters.push_back(TerrainQuadrant(quadrant.a + (AD / 2.0f), quadrant.a + (AC / 2.0f), quadrant.d + (DC / 2.0f), quadrant.c, quadrant.altitude + ((float)rand() / RAND_MAX) * range - (range / 2)));
-
-	return quarters;
-}
-
-void SphericalQuadrant(TerrainQuadrant& quadrant, float radius)
-{
-	quadrant.a = glm::normalize(quadrant.a) * radius;
-	quadrant.b = glm::normalize(quadrant.b) * radius;
-	quadrant.c = glm::normalize(quadrant.c) * radius;
-	quadrant.d = glm::normalize(quadrant.d) * radius;
-}
-
-glm::vec3 QuadrantCentre(TerrainQuadrant quadrant)
-{
-	return (quadrant.a + quadrant.b + quadrant.c + quadrant.d) / 4.0f;
-}
-*/
 
 glm::vec3 SphericalPoint(glm::vec3 point, float radius)
 {
@@ -104,55 +66,24 @@ PolyVertex* AddVertexIfNotExists(Polyhedron& polyhedron, PolyVertex& vertex, std
 	return newEdgeVertex;
 }
 
-/*
-struct GlobalCoord
+glm::vec3 World::DetermineBiome(float latitude, float longitude)
 {
-	float lat;
-	float lon;
-};
+	float altitude = altitudeMap.Value(latitude, longitude);
+	altitude -= altitudeMap.average;
+	altitude /= altitudeMap.stdev;
 
-struct AltitudeSeed
-{
-	glm::vec3 normal;
-	float altitude;
-	float magnitude;
-};
+	float precipitation = precipitationMap.Value(latitude, longitude);
+	precipitation -= precipitationMap.average;
+	precipitation /= precipitationMap.stdev;
 
-GlobalCoord SphereVectorToGlobalCoord(glm::vec3 sphereVector, float sphereRadius)
-{
-	GlobalCoord globalCoord;
-	globalCoord.lat = atan2f(sphereVector.z, sqrtf(powf(sphereVector.x, 2) + powf(sphereVector.y, 2)));
-	globalCoord.lon = atan2f(sphereVector.y, sphereVector.x);
-	return globalCoord;
-}
+	float soil = soilMap.Value(latitude, longitude);
+	soil -= soilMap.average;
+	soil /= soilMap.stdev;
 
-float GreatCircleDistance(glm::vec3 a, glm::vec3 b, float radius)
-{
-	return radius * atanf(glm::length(glm::cross(a, b)) / glm::dot(a, b));
-}
-*/
-
-glm::vec3 DetermineBiome(ValueMap& altitudeFractal, ValueMap& precipitationFractal, ValueMap& soilFractal, float latitude, float longitude, float seaLevel)
-{
-	float altitude = altitudeFractal.Value(latitude, longitude);
-	altitude -= altitudeFractal.average;
-	altitude /= altitudeFractal.stdev;
-
-	float precipitation = precipitationFractal.Value(latitude, longitude);
-	precipitation -= precipitationFractal.average;
-	precipitation /= precipitationFractal.stdev;
-
-	float soil = soilFractal.Value(latitude, longitude);
-	soil -= soilFractal.average;
-	soil /= soilFractal.stdev;
-
-	float temperature = (-fabsf(latitude) * 1.0f) + Random::RandomFloat(-0.01f, 0.01f);
-	//std::cout << temperature << std::endl;
-
-	temperature -= (altitude > seaLevel ? (altitude - seaLevel) : 0) * 0.35f;
+	float temperature = temperatureMap.Value(latitude, longitude);
 	precipitation -= (altitude > seaLevel ? (altitude - seaLevel) : 0) * 0.1f;
 
-	if (temperature < -0.85f)
+	if (temperature < -20.0f)
 	{
 		return glm::vec3(224, 221, 216);
 	}
@@ -167,11 +98,11 @@ glm::vec3 DetermineBiome(ValueMap& altitudeFractal, ValueMap& precipitationFract
 	{
 		if (precipitation < -1.0f)
 		{
-			if (temperature < -0.8f)
+			if (temperature < 0.0f)
 			{
 				// Barren wasteland
 				return glm::vec3(224, 221, 216);
-			} else if (temperature < -0.4f)
+			} else if (temperature < 20.0f)
 			{
 				// Temperate desert
 				return glm::vec3(227, 235, 138);
@@ -182,11 +113,11 @@ glm::vec3 DetermineBiome(ValueMap& altitudeFractal, ValueMap& precipitationFract
 			}
 		} else if (precipitation < 1.0f)
 		{
-			if (temperature < -0.8f)
+			if (temperature < 0.0f)
 			{
 				// Tundra
 				return glm::vec3(189, 196, 151);
-			} else if (temperature < -0.4f)
+			} else if (temperature < 20.0f)
 			{
 				// Steppe
 				return glm::vec3(113, 140, 97);
@@ -198,11 +129,11 @@ glm::vec3 DetermineBiome(ValueMap& altitudeFractal, ValueMap& precipitationFract
 
 		} else
 		{
-			if (temperature < -0.8f)
+			if (temperature < 0.0f)
 			{
 				// Frozen bog
 				return glm::vec3(50, 54, 47);
-			} else if (temperature < -0.4f)
+			} else if (temperature < 20.0f)
 			{
 				// Temperate bog
 				return glm::vec3(41, 46, 3);
@@ -217,11 +148,11 @@ glm::vec3 DetermineBiome(ValueMap& altitudeFractal, ValueMap& precipitationFract
 	{
 		if (precipitation < -1.0f)
 		{
-			if (temperature < -0.8f)
+			if (temperature < 0.0f)
 			{
 				// Tundra
 				return glm::vec3(189, 196, 151);
-			} else if (temperature < -0.4f)
+			} else if (temperature < 20.0f)
 			{
 				// Steppe
 				return glm::vec3(113, 140, 97);
@@ -233,11 +164,11 @@ glm::vec3 DetermineBiome(ValueMap& altitudeFractal, ValueMap& precipitationFract
 
 		} else if (precipitation < 1.0f)
 		{
-			if (temperature < -0.8f)
+			if (temperature < 0.0f)
 			{
 				// Boreal forest
 				return glm::vec3(34, 41, 27);
-			} else if (temperature < -0.4f)
+			} else if (temperature < 20.0f)
 			{
 				// Woodlands
 				return glm::vec3(77, 92, 51);
@@ -249,11 +180,11 @@ glm::vec3 DetermineBiome(ValueMap& altitudeFractal, ValueMap& precipitationFract
 
 		} else
 		{
-			if (temperature < -0.8f)
+			if (temperature < 0.0f)
 			{
 				// Boreal marshland
 				return glm::vec3(24, 31, 21);
-			} else if (temperature < -0.4f)
+			} else if (temperature < 20.0f)
 			{
 				// Temperate marshland
 				return glm::vec3(30, 36, 22);
@@ -268,11 +199,11 @@ glm::vec3 DetermineBiome(ValueMap& altitudeFractal, ValueMap& precipitationFract
 	{
 		if (precipitation < -1.0f)
 		{
-			if (temperature < -0.8f)
+			if (temperature < 0.0f)
 			{
 				// Tundra
 				return glm::vec3(189, 196, 151);
-			} else if (temperature < -0.4f)
+			} else if (temperature < 20.0f)
 			{
 				// Steppe
 				return glm::vec3(113, 140, 97);
@@ -284,11 +215,11 @@ glm::vec3 DetermineBiome(ValueMap& altitudeFractal, ValueMap& precipitationFract
 
 		} else if (precipitation < 1.0f)
 		{
-			if (temperature < -0.8f)
+			if (temperature < 0.0f)
 			{
 				// Taiga
 				return glm::vec3(21, 36, 10);
-			} else if (temperature < -0.4f)
+			} else if (temperature < 20.0f)
 			{
 				// Forest
 				return glm::vec3(36, 64, 20);
@@ -300,11 +231,11 @@ glm::vec3 DetermineBiome(ValueMap& altitudeFractal, ValueMap& precipitationFract
 
 		} else
 		{
-			if (temperature < -0.8f)
+			if (temperature < 0.0f)
 			{
 				// Boreal swamp
 				return glm::vec3(13, 20, 10);
-			} else if (temperature < -0.4f)
+			} else if (temperature < 20.0f)
 			{
 				// Temperate swamp
 				return glm::vec3(12, 28, 6);
@@ -328,7 +259,7 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	CreateFractal(altitudeMap, powf(2, 10), 1.0f, 1.55f);
 	CreateFractal(precipitationMap, powf(2, 10), 1.0f, 1.8f);
 	CreateFractal(soilMap, powf(2, 10), 1.0f, 1.8f);
-	CreateFractal(temperatureMap, powf(2, 8), 1.0f, 2.0f);
+	CreateFractal(temperatureMap, powf(2, 10), 1.0f, 2.0f);
 
 	seaLevel = 0.5f;
 
@@ -414,6 +345,10 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	std::map<TileComponent*, std::vector<int>> tileToVertexIndices;
 	std::map<TileComponent*, std::vector<PolyVertex*>> tileToNeighbourVertices;
 	std::map<PolyVertex*, TileComponent*> vertexToTile;
+	float maxLatitude = 0.0f;
+	float minLatitude = 10.0f;
+	float maxLongitude = 0.0f;
+	float minLongitude = 10.0f;
 	for (auto& vertex : geodesic.vertices)
 	{
 		EntityID tileEntityID = registry->RegisterEntity();
@@ -441,14 +376,23 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 
 		std::vector<GLVertex> vertices;
 		glm::vec3 tileNormal = glm::normalize(Centroid(centreVertices));
-		//std::cout << "(" << latitude << ", " << longitude << ")" << std::endl;
 		float latitude = NormalToLatitude(tileNormal);
 		float longitude = NormalToLongitude(tileNormal);
 
 		tile->latitude = latitude;
 		tile->longitude = longitude;
 
-		glm::vec3 faceColour = DetermineBiome(altitudeMap, precipitationMap, soilMap, latitude, longitude, 0.5f) / 256.0f;
+		if (latitude < minLatitude) minLatitude = latitude;
+		if (latitude > maxLatitude) maxLatitude = latitude;
+		if (longitude < minLongitude) minLongitude = longitude;
+		if (longitude > maxLongitude) maxLongitude = longitude;
+
+		float altitudeOffset = altitudeMap.Value(latitude, longitude) - altitudeMap.average;
+		altitudeOffset /= altitudeMap.stdev;
+		altitudeOffset -= seaLevel;
+		if (altitudeOffset < 0) altitudeOffset = 0;
+		glm::vec3 altitudeColour = glm::vec3(1.0f - (altitudeOffset * 0.25f));
+		glm::vec3 faceColour = DetermineBiome(latitude, longitude) / 256.0f;
 
 		int oldVertexCount = worldModel->model.mesh.vertices.size();
 		for (auto& vertex : centreVertices)
@@ -474,6 +418,11 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	end = std::chrono::steady_clock::now();
 	std::cout << "done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
 
+	std::cout << "Maximum latitude: " << maxLatitude << std::endl;
+	std::cout << "Minimum latitude: " << minLatitude << std::endl;
+	std::cout << "Maximum longitude: " << maxLongitude << std::endl;
+	std::cout << "Minimum longitude: " << minLongitude << std::endl;
+
 	std::cout << "Resolving tile neighbours...";
 	begin = std::chrono::steady_clock::now();
 	for (auto& pair : tileToNeighbourVertices)
@@ -496,60 +445,80 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 	std::cout << "Geodesic vertex count: " << geodesic.vertices.size() << std::endl;
 	std::cout << "Geodesic face count: " << geodesic.faces.size() << std::endl;
 	std::cout << "Average face altitude: " << altitudeMap.average << std::endl;
-
-	GenerateClimateMap();
-	//GenerateClouds(registry, size * 1.02f, subdivisions);
 }
 
-void World::GenerateClimateMap()
+/*
+
+void UpdateTemperature(HabitablePlanetComponent* planet, CelestialBodyComponent* body)
 {
-	averageTemperatureMap = temperatureMap;
-	glm::quat tilt = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::angleAxis(glm::radians(23.5f), glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::quat hourlyRotations[24];
-	int dayCount = 30;
-	int hourCount = 24;
-	for (int i = 0; i < 24; i++)
+	glm::vec3 sunDirection = glm::normalize(-body->position);
+	auto& altitudeMap = body->topography;
+	auto& temperatureMap = planet->temperature;
+	float spaceTemp = -270.0f;
+	float spaceLoss = 0.00042f;
+	float sunEffect = 0.4f;
+	float sunExp = 0.9f;
+	for (int i = 0; i < temperatureMap.width - 1; i++)
 	{
-		hourlyRotations[i] = glm::angleAxis(glm::radians((float)i / (float)hourCount * 360.0f - 180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	}
-	for (int day = 0; day < dayCount; day++)
-	{
-		std::cout << "Day " << day << std::endl;
-		glm::quat revolution = glm::angleAxis(glm::radians((float)day / (float)dayCount * 360.0f - 180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		for (int hour = 0; hour < 24; hour++)
+		for (int j = 0; j < temperatureMap.width - 1; j++)
 		{
-			UpdateTemperature(glm::mat4_cast(tilt * revolution * hourlyRotations[hour]) * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), 1.0f);
-			for (int i = 0; i < temperatureMap.size - 1; i++)
+			auto& temperature = temperatureMap.values[i * temperatureMap.width + j];
+			float latitude, longitude;
+			temperatureMap.MapCoordsToLatitudeLongitude(i, j, latitude, longitude);
+			float altitudeDeviation = (altitudeMap.Value(latitude, longitude) - planet->seaLevel) / altitudeMap.stdev;
+			float localSpaceLoss = spaceLoss * ((altitudeDeviation >= 0) ? (1.0f + (powf(altitudeDeviation, 2.0f) * 0.02f)) : 1.0f);
+			glm::vec3 normal = LatitudeLongitudeToNormal(latitude, longitude);
+			float sunAmount = glm::dot(normal, sunDirection);
+			temperatureMap.values[i * temperatureMap.width + j] *= (1.0f - localSpaceLoss);
+			temperatureMap.values[i * temperatureMap.width + j] += localSpaceLoss * spaceTemp;
+			if (sunAmount > 0)
 			{
-				for (int j = 0; j < temperatureMap.size - 1; j++)
-				{
-					averageTemperatureMap.values[i * temperatureMap.size + j] += temperatureMap.values[i * temperatureMap.size + j];
-				}
+				temperatureMap.values[i * temperatureMap.width + j] += powf(sunAmount, sunExp) * sunEffect;
 			}
 		}
 	}
-
-	for (int i = 0; i < temperatureMap.size - 1; i++)
-	{
-		for (int j = 0; j < temperatureMap.size - 1; j++)
-		{
-			averageTemperatureMap.values[i * temperatureMap.size + j] /= (dayCount * hourCount);
-		}
-	}
-
-	temperatureMap = averageTemperatureMap;
+	temperatureMap.Average();
+	temperatureMap.Stdev(temperatureMap.average);
 }
 
-void World::GenerateClouds(Registry* registry, float size, int subdivisions)
+void UpdateHabitat(HabitablePlanetComponent* habitat, CelestialBodyComponent* body)
 {
-	Polyhedron icosahedron = Icosahedron(size);
+	glm::vec3 sun = glm::normalize(-body->position);
+	auto& topography = body->topography;
+	auto& temperature = habitat->temperature;
+	auto& humidity = habitat->humidity;
+	auto& moisture = habitat->moisture;
+	int resolution = body->mapResolution;
+	for (int i = 0; i < resolution - 1; i++)
+	{
+		for (int j = 0; j < resolution - 1; j++)
+		{
+			int index = i * resolution + j;
+			float& localTemperature = temperature.values[index];
+			float& localAltitude = topography.values[index];
+			float& localHumidity = humidity.values[index];
+			float& localMoisture = moisture.values[index];
+
+
+
+			float localSpaceLoss = spaceLoss * ((altitudeDeviation >= 0) ? (1.0f + (powf(altitudeDeviation, 2.0f) * 0.02f)) : 1.0f);
+			glm::vec3 normal = LatitudeLongitudeToNormal(latitude, longitude);
+			float sunAmount = glm::dot(normal, sunDirection);
+			temperatureMap.values[i * temperatureMap.size + j] *= (1.0f - localSpaceLoss);
+			temperatureMap.values[i * temperatureMap.size + j] += localSpaceLoss * spaceTemp;
+			if (sunAmount > 0)
+			{
+				temperatureMap.values[i * temperatureMap.size + j] += powf(sunAmount, sunExp) * sunEffect;
+			}
+		}
+	}
+}
+
+void GenerateTiles(Registry* registry, EntityID worldID, int subdivisions)
+{
+	Polyhedron icosahedron = Icosahedron(1.0f);
 	Polyhedron geodesic;
 
-	std::chrono::steady_clock::time_point begin;
-	std::chrono::steady_clock::time_point end;
-
-	std::cout << "Subdividing icosahedron into geodesic...";
-	begin = std::chrono::steady_clock::now();
 	std::vector<PolyVertex*> edgeVertices;
 	int edgeCount = 0;
 	int innerCount = 0;
@@ -605,257 +574,95 @@ void World::GenerateClouds(Registry* registry, float size, int subdivisions)
 			count++;
 		}
 	}
-	end = std::chrono::steady_clock::now();
-	std::cout << " done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
 
-	std::cout << "Projecting geodesic onto sphere...";
-	begin = std::chrono::steady_clock::now();
+	for (auto& vertex : geodesic.vertices) vertex->coords = glm::normalize(vertex->coords);
+
+	ModelComponent* worldModel = registry->AddComponent<ModelComponent>(worldID);
+	std::map<TileComponent*, std::vector<int>> tileToVertexIndices;
+	std::map<TileComponent*, std::vector<PolyVertex*>> tileToNeighbourVertices;
+	std::map<PolyVertex*, TileComponent*> vertexToTile;
 	for (auto& vertex : geodesic.vertices)
 	{
-		vertex->coords = glm::normalize(vertex->coords) * size;
-	}
-	end = std::chrono::steady_clock::now();
-	std::cout << " done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
+		EntityID tileEntityID = registry->RegisterEntity();
 
-	std::cout << "Generating GL data...";
-	begin = std::chrono::steady_clock::now();
-	EntityID cloudsID = registry->RegisterEntity();
-	ModelComponent* cloudsModel = registry->AddComponent<ModelComponent>(cloudsID);
-	for (auto& vertex : geodesic.vertices)
-	{
-		EntityID cloudEntityID = registry->RegisterEntity();
-
-		CloudComponent* cloud = registry->AddComponent<CloudComponent>(cloudEntityID);
+		TileComponent* tile = registry->AddComponent<TileComponent>(tileEntityID);
+		vertexToTile[vertex.get()] = tile;
+		tile->worldID = worldID;
 
 		std::vector<glm::vec3> centreVertices;
+
+		auto& neighbourVertices = tileToNeighbourVertices[tile];
 
 		for (auto& memberPolygon : vertex->memberPolygons)
 		{
 			centreVertices.push_back(memberPolygon->Centroid());
+			for (auto& neighbourVertex : memberPolygon->vertices)
+			{
+				if (std::find(neighbourVertices.begin(), neighbourVertices.end(), neighbourVertex) == neighbourVertices.end())
+				{
+					neighbourVertices.push_back(neighbourVertex);
+				}
+			}
 		}
+
 		WindOutward(centreVertices, true);
 
 		std::vector<GLVertex> vertices;
-		glm::vec3 tileNormal = glm::normalize(Centroid(centreVertices));
-		//std::cout << "(" << latitude << ", " << longitude << ")" << std::endl;
-		float latitude = NormalToLatitude(tileNormal);
-		float longitude = NormalToLongitude(tileNormal);
 
-		int oldVertexCount = cloudsModel->model.mesh.vertices.size();
-		float cloudEffect = precipitationMap.Value(latitude, longitude);
-		cloudEffect -= precipitationMap.average;
-		cloudEffect /= precipitationMap.stdev;
-		for (auto& vertex : centreVertices)
+		float latitude = NormalToLatitude(vertex->coords);
+		float longitude = NormalToLongitude(vertex->coords);
+
+		tile->latitude = latitude;
+		tile->longitude = longitude;
+
+		glm::vec3 faceColour = glm::vec3(1.0f);
+
+		int oldVertexCount = worldModel->model.mesh.vertices.size();
+		for (auto& centreVertex : centreVertices)
 		{
 			GLVertex newVertex;
-			newVertex.position = vertex;
-			newVertex.normal = tileNormal;
-			newVertex.colour = glm::vec4(glm::vec3(1.0f - cloudEffect / 3.0f), cloudEffect);
+			newVertex.position = centreVertex;
+			newVertex.normal = vertex->coords;
+			newVertex.colour = glm::vec4(faceColour, 1.0f);
 			newVertex.texUV = glm::vec2(0.0f);
 
-			cloudsModel->model.mesh.vertices.push_back(newVertex);
+			worldModel->model.mesh.vertices.push_back(newVertex);
+			tileToVertexIndices[tile].push_back(worldModel->model.mesh.vertices.size() - 1);
 		}
 
 		std::vector<GLuint> indices = std::vector<GLuint>();
 		for (int i = 1; i < centreVertices.size() - 1; i++)
 		{
-			cloudsModel->model.mesh.indices.push_back(oldVertexCount);
-			cloudsModel->model.mesh.indices.push_back(oldVertexCount + i);
-			cloudsModel->model.mesh.indices.push_back(oldVertexCount + i + 1);
+			worldModel->model.mesh.indices.push_back(oldVertexCount);
+			worldModel->model.mesh.indices.push_back(oldVertexCount + i);
+			worldModel->model.mesh.indices.push_back(oldVertexCount + i + 1);
 		}
 	}
-	end = std::chrono::steady_clock::now();
-	std::cout << "done, " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
 
-	cloudsModel->model.mesh.Setup();
-	cloudsModel->model.position.z = -20.0f;
+	for (auto& pair : tileToNeighbourVertices)
+	{
+		auto tile = pair.first;
+		auto& neighbours = pair.second;
+		for (auto& neighbour : neighbours)
+		{
+			auto neighbourTile = vertexToTile[neighbour];
+			tile->neighbours.push_back(tile->id);
+		}
+	}
 }
 
-void World::UpdateTemperature(glm::vec3 sunDirection, float deltaT)
+void GenerateWorld(Registry* registry, int subdivisions)
 {
-	float spaceTemp = -270.0f;
-	float spaceLoss = 0.003f;
-	float sunEffect = 2.75f;
-	float sunExp = 1.1f;
-	for (int i = 0; i < temperatureMap.size - 1; i++)
-	{
-		for (int j = 0; j < temperatureMap.size - 1; j++)
-		{
-			float latitude, longitude;
-			temperatureMap.MapCoordsToLatitudeLongitude(i, j, latitude, longitude);
-			float altitudeDeviation = (altitudeMap.Value(latitude, longitude) - altitudeMap.average) / altitudeMap.stdev - seaLevel;
-			float localSpaceLoss = spaceLoss;// / altitudeDeviation >= 0 ? (1.0f + powf(altitudeDeviation, 1.05f) * 0.001f) : 1.0f;
-			glm::vec3 normal = LatitudeLongitudeToNormal(latitude, longitude);
-			float sunAmount = glm::dot(normal, sunDirection);
-			temperatureMap.values[i * temperatureMap.size + j] *= (1.0f - localSpaceLoss);
-			temperatureMap.values[i * temperatureMap.size + j] += localSpaceLoss * spaceTemp;
-			if (sunAmount > 0)
-			{
-				temperatureMap.values[i * temperatureMap.size + j] += powf(sunAmount, sunExp) * sunEffect;
-			}
-		}
-	}
+	EntityID worldID = registry->RegisterEntity();
+	auto planet = registry->AddComponent<HabitablePlanetComponent>(worldID);
+	auto body = registry->AddComponent<CelestialBodyComponent>(worldID);
+
+	int mapResolution = powf(2, 9);
+
+	CreateFractal(body->topography, mapResolution, 1.0f, 1.55f);
+
+
+
+	GenerateTiles(registry, worldID, subdivisions);
 }
-
-void World::UpdateTemperatureModel(Registry* registry)
-{
-	auto worlds = registry->View<ModelComponent>();
-	int bullshit = 1;
-	for (auto& world : worlds)
-	{
-		if (bullshit)
-		{
-			bullshit = 0;
-
-			for (auto& vertex : world->model.mesh.vertices)
-			{
-				float latitude = NormalToLatitude(vertex.normal);
-				float longitude = NormalToLongitude(vertex.normal);
-				float temp = temperatureMap.Value(latitude, longitude);
-				temp += 60.0f;
-				temp /= 90.0f;
-				vertex.colour = glm::vec4(temp, 0.0f, 1.0f - temp, 1.0f);
-			}
-
-			world->model.mesh.ResetVertices();
-		}
-	}
-}
-
-void World::UpdatePrecipitation(Registry* registry, EntityID cloudsID)
-{
-	// Cloud movement
-	ValueMap precipitationCopy = precipitationMap;
-	for (int i = 0; i < precipitationMap.size - 1; i++)
-	{
-		for (int j = 0; j < precipitationMap.size - 1; j++)
-		{
-			int left = QuickOverflow(i - 1, precipitationMap.size);
-			int right = QuickOverflow(i + 1, precipitationMap.size);
-			int top = QuickOverflow(j - 1, precipitationMap.size);
-			int bottom = QuickOverflow(j + 1, precipitationMap.size);
-
-			int index = i * precipitationMap.size + j;
-			int leftIndex = left * precipitationMap.size + j;
-			int rightIndex = right * precipitationMap.size + j;
-			int topIndex = i * precipitationMap.size + top;
-			int bottomIndex = i * precipitationMap.size + bottom;
-
-			float value = precipitationMap.values[index];
-			float leftValue = precipitationMap.values[leftIndex];
-			float rightValue = precipitationMap.values[rightIndex];
-			float topValue = precipitationMap.values[topIndex];
-			float bottomValue = precipitationMap.values[bottomIndex];
-
-			int lowerCount = 0;
-			float averageValue = 0.0f;
-			bool useLeft = value > leftValue;
-			if (useLeft)
-			{
-				lowerCount++;
-				averageValue += leftValue;
-			}
-			bool useRight = value > rightValue;
-			if (useRight)
-			{
-				lowerCount++;
-				averageValue += rightValue;
-			}
-			bool useTop = value > topValue;
-			if (useTop)
-			{
-				lowerCount++;
-				averageValue += topValue;
-			}
-			bool useBottom = value > bottomValue;
-			if (useBottom)
-			{
-				lowerCount++;
-				averageValue += bottomValue;
-			}
-
-			averageValue /= lowerCount;
-
-			while (true)
-			{
-				bool change = false;
-				if (useLeft && leftValue >= averageValue)
-				{
-					averageValue *= lowerCount;
-					averageValue -= leftValue;
-					lowerCount--;
-					averageValue /= lowerCount;
-					useLeft = false;
-					change = true;
-				}
-				if (useRight && rightValue >= averageValue)
-				{
-					averageValue *= lowerCount;
-					averageValue -= rightValue;
-					lowerCount--;
-					averageValue /= lowerCount;
-					useRight = false;
-					change = true;
-				}
-				if (useTop && topValue >= averageValue)
-				{
-					averageValue *= lowerCount;
-					averageValue -= rightValue;
-					lowerCount--;
-					averageValue /= lowerCount;
-					useTop = false;
-					change = true;
-				}
-				if (useBottom && bottomValue >= averageValue)
-				{
-					averageValue *= lowerCount;
-					averageValue -= bottomValue;
-					lowerCount--;
-					averageValue /= lowerCount;
-					useBottom = false;
-					change = true;
-				}
-				if (!change) break;
-			}
-
-			if (lowerCount > 0) precipitationCopy.values[index] -= (value - averageValue);
-
-			if (useLeft) precipitationCopy.values[leftIndex] += (averageValue - leftValue);
-			if (useRight) precipitationCopy.values[rightIndex] += (averageValue - rightValue);
-			if (useTop) precipitationCopy.values[topIndex] += (averageValue - topValue);
-			if (useBottom) precipitationCopy.values[bottomIndex] += (averageValue - bottomValue);
-		}
-	}
-
-	precipitationMap.Free();
-	precipitationMap.values = precipitationCopy.values;
-	precipitationCopy.Free();
-
-	// Rain
-	float precipAltDiff = (float)altitudeMap.size / (float)precipitationMap.size;
-	for (int i = 0; i < precipitationMap.size - 1; i++)
-	{
-		for (int j = 0; j < precipitationMap.size - 1; j++)
-		{
-			int index = i * precipitationMap.size + j;
-
-			if ((altitudeMap.values[(int)(i * precipAltDiff) * altitudeMap.size + (int)(j * precipAltDiff)] - altitudeMap.average) / altitudeMap.stdev < 0.5f) precipitationMap.values[index] += 0.01f;
-			else precipitationMap.values[index] *= 0.5f;
-		}
-	}
-
-	auto clouds = registry->GetComponent<ModelComponent>(cloudsID);
-	for (auto& cloudVertex : clouds->model.mesh.vertices)
-	{
-		float latitude = NormalToLatitude(cloudVertex.normal);
-		float longitude = NormalToLongitude(cloudVertex.normal);
-
-		float cloudEffect = precipitationMap.Value(latitude, longitude);
-		//cloudEffect -= precipitation.average;
-		//cloudEffect /= precipitation.stdev;
-
-		cloudVertex.colour = glm::vec4(glm::vec3(1.0f - cloudEffect * 0.6f), cloudEffect * 0.6f);
-	}
-
-	clouds->model.mesh.ResetVertices();
-}
+*/

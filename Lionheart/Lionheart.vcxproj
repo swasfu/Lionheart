@@ -174,7 +174,7 @@
     <ClInclude Include="lib\1240\components\FlagsComponent.h" />
     <ClInclude Include="lib\lionheart\ecs\Registry.h" />
     <ClInclude Include="lib\ecs\parsing\XMLParser.h" />
-    <ClInclude Include="lib\lionheart\ecs\SystemBase.h" />
+    <ClInclude Include="lib\lionheart\ecs\Scheduler.h" />
     <ClInclude Include="lib\lionheart\graphics\GLCamera.h" />
     <ClInclude Include="lib\lionheart\graphics\GLComputeShader.h" />
     <ClInclude Include="lib\lionheart\graphics\GLEBO.h" />
@@ -196,15 +196,18 @@
     <ClInclude Include="lib\thirdparty\pugixml\pugiconfig.hpp" />
     <ClInclude Include="lib\thirdparty\pugixml\pugixml.hpp" />
     <ClInclude Include="lib\thirdparty\stb\stb_image.h" />
+    <ClInclude Include="lib\worldgen\components\CelestialBodyComponent.h" />
     <ClInclude Include="lib\worldgen\components\CloudComponent.h" />
     <ClInclude Include="lib\worldgen\Fractal.h" />
+    <ClInclude Include="lib\worldgen\systems\WorldGeneration.h" />
     <ClInclude Include="lib\worldgen\ValueMap.h" />
     <ClInclude Include="lib\worldgen\World.h" />
     <ClInclude Include="lib\worldgen\components\ModelComponent.h" />
     <ClInclude Include="lib\worldgen\components\TileComponent.h" />
-    <ClInclude Include="lib\worldgen\components\WorldComponent.h" />
+    <ClInclude Include="lib\worldgen\components\HabitablePlanetComponent.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\lionheart\ecs\Scheduler.cpp" />
     <ClCompile Include="src\worldgen\Fractal.cpp" />
     <ClCompile Include="src\lionheart\ecs\Registry.cpp" />
     <ClCompile Include="src\lionheart\graphics\GLCamera.cpp" />

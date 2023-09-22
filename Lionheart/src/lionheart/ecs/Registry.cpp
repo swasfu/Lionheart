@@ -12,6 +12,18 @@ EntityID Registry::RegisterEntity(std::string stringID)
 	return newEntityID;
 }
 
+void Registry::RemoveEntity(EntityID id)
+{
+	for (auto componentTypeIterator = componentTypeToMap_.begin(); componentTypeIterator != componentTypeToMap_.end();)
+	{
+		auto& componentMap = componentTypeIterator->second;
+		auto iter = componentMap.find(id);
+		if (iter != componentMap.end()) componentMap.erase(iter);
+		if (componentTypeIterator->second.size() == 0) componentTypeIterator = componentTypeToMap_.erase(componentTypeIterator);
+		else componentTypeIterator++;
+	}
+}
+
 void Registry::LodgeUnresolvedID(EntityID* entityIDPtr, std::string stringID)
 {
 	unresolvedEntityIDPtrsToStringIDs_[entityIDPtr] = stringID;
