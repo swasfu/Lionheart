@@ -67,7 +67,7 @@ void CreateFractal(ValueMap& map, int size, float factor, float factorDecay)
 	{
 		for (int latitude = 0; latitude < map.height; latitude++)
 		{
-			map.values[longitude * map.height + latitude];
+			map.values[longitude * map.height + latitude] = mapData[longitude * size + latitude];
 		}
 	}
 

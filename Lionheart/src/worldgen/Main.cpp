@@ -1,5 +1,7 @@
 #include "worldgen/World.h"
 #include "worldgen/components/ModelComponent.h"
+#include "worldgen/Fractal.h"
+#include "math/Constants.h"
 
 #include "lionheart/graphics/GLShaderProgram.h"
 #include "lionheart/graphics/GLVBO.h"
@@ -65,8 +67,34 @@ int main(void)
 	glUniform4f(glGetUniformLocation(shaderProgram.id, "lightColour"), lightColour.x, lightColour.y, lightColour.z, lightColour.w);
 	glUniform3f(glGetUniformLocation(shaderProgram.id, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
+	/*ValueMap test;
+	int testSize = pow(2, 5);
+	CreateFractal(test, testSize, 1.0f, 1.55f);
+	std::cout << "Width: " << test.width << std::endl;
+	std::cout << "Height: " << test.height << std::endl;
+	std::cout << "X-Y" << std::endl;
+	for (int y = 0; y < testSize / 2; y++)
+	{
+		for (int x = 0; x < testSize; x++)
+		{
+			std::cout << (int)(test.values[x * test.height + y] * 9.f) << " ";
+		}
+		std::cout << std::endl;
+	}
+
+
+	std::cout << "LAT-LON" << std::endl;
+	for (float y = -Constants::HALF_PI; y < Constants::HALF_PI; y += (Constants::PI / (float)(testSize / 2)))
+	{
+		for (float x = -Constants::PI; x < Constants::PI; x += (Constants::TWO_PI / (float)testSize))
+		{
+			std::cout << (int)(test.Value(y, x) * 9.0f) << " ";
+		}
+		std::cout << std::endl;
+	}*/
+
 	World world;
-	world.GenerateTiles(&registry, worldSize, 100);
+	world.GenerateTiles(&registry, worldSize, 50);
 
 	while (!glfwWindowShouldClose(window))
 	{

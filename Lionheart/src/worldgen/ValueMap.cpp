@@ -88,7 +88,9 @@ float ValueMap::Value(float latitude, float longitude)
 	if (latitude < 0.0f) latitude = 0.0f;
 	if (longitude > 1.0f) longitude = 1.0f;
 	if (longitude < 0.0f) longitude = 0.0f;
-	return values[height * (longitude * (width - 1)) + (latitude * (height - 1))];
+	//std::cout << "Latitude: " << latitude << std::endl;
+	//std::cout << "Longitude: " << longitude << std::endl;
+	return values[height * (int)(longitude * (width - 1)) + (int)(latitude * (height - 1))];
 }
 
 float ValueMap::MapCoordsToLatitude(int y)

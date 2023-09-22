@@ -13,7 +13,7 @@ uniform vec3 cameraPos;
 void main()
 {
     // ambient lighting
-    float ambient = 1.0f;
+    float ambient = 0.3f;
 
     vec3 lightDirection = normalize(lightPos - vPosition);
 

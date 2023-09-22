@@ -81,6 +81,8 @@ glm::vec3 World::DetermineBiome(float latitude, float longitude)
 	soil /= soilMap.stdev;
 
 	float temperature = temperatureMap.Value(latitude, longitude);
+	temperature *= 100.0f;
+	temperature -= 50.0f;
 	precipitation -= (altitude > seaLevel ? (altitude - seaLevel) : 0) * 0.1f;
 
 	if (temperature < -20.0f)
@@ -256,10 +258,10 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 {
 	Random::Seed("test");
 
-	CreateFractal(altitudeMap, powf(2, 10), 1.0f, 1.55f);
-	CreateFractal(precipitationMap, powf(2, 10), 1.0f, 1.8f);
-	CreateFractal(soilMap, powf(2, 10), 1.0f, 1.8f);
-	CreateFractal(temperatureMap, powf(2, 10), 1.0f, 2.0f);
+	CreateFractal(altitudeMap, powf(2, 9), 1.0f, 1.55f);
+	CreateFractal(precipitationMap, powf(2, 9), 1.0f, 1.8f);
+	CreateFractal(soilMap, powf(2, 9), 1.0f, 1.8f);
+	CreateFractal(temperatureMap, powf(2, 9), 1.0f, 2.0f);
 
 	seaLevel = 0.5f;
 
@@ -376,23 +378,14 @@ void World::GenerateTiles(Registry* registry, float size, int subdivisions)
 
 		std::vector<GLVertex> vertices;
 		glm::vec3 tileNormal = glm::normalize(Centroid(centreVertices));
-		float latitude = NormalToLatitude(tileNormal);
-		float longitude = NormalToLongitude(tileNormal);
+		NormalToLatitudeLongitude(tileNormal, tile->latitude, tile->longitude);
 
-		tile->latitude = latitude;
-		tile->longitude = longitude;
+		if (tile->latitude < minLatitude) minLatitude = tile->latitude;
+		if (tile->latitude > maxLatitude) maxLatitude = tile->latitude;
+		if (tile->longitude < minLongitude) minLongitude = tile->longitude;
+		if (tile->longitude > maxLongitude) maxLongitude = tile->longitude;
 
-		if (latitude < minLatitude) minLatitude = latitude;
-		if (latitude > maxLatitude) maxLatitude = latitude;
-		if (longitude < minLongitude) minLongitude = longitude;
-		if (longitude > maxLongitude) maxLongitude = longitude;
-
-		float altitudeOffset = altitudeMap.Value(latitude, longitude) - altitudeMap.average;
-		altitudeOffset /= altitudeMap.stdev;
-		altitudeOffset -= seaLevel;
-		if (altitudeOffset < 0) altitudeOffset = 0;
-		glm::vec3 altitudeColour = glm::vec3(1.0f - (altitudeOffset * 0.25f));
-		glm::vec3 faceColour = DetermineBiome(latitude, longitude) / 256.0f;
+		glm::vec3 faceColour = DetermineBiome(tile->latitude, tile->longitude) / 256.0f;
 
 		int oldVertexCount = worldModel->model.mesh.vertices.size();
 		for (auto& vertex : centreVertices)

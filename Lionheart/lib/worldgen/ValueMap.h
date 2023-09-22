@@ -36,4 +36,5 @@ struct ValueMap
 
 float NormalToLatitude(glm::vec3 normal);
 float NormalToLongitude(glm::vec3 normal);
+void NormalToLatitudeLongitude(glm::vec3 normal, float& latitude, float& longitude);
 glm::vec3 LatitudeLongitudeToNormal(float latitude, float longitude);
